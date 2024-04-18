@@ -1,0 +1,43 @@
+doctype html
+html
+  head
+    meta(http-equiv='content-type', content='text/html; charset=windows-1252')
+    title VIIP Dating App
+    style(type='text/css').
+      body{font-family: Helvetica,sans-Serif;color: #77798c;font-size: 14px;}
+  body
+    table(style='padding: 0;', width='100%', cellspacing='0', cellpadding='0')
+      tbody
+        tr
+          td
+            table(style='margin: 0px auto 0px; text-align: center; box-shadow: 0px 0px 15px 0px rgba(0, 0, 0, 0.1); border-radius: 4px;background-color:#f4f6ff; padding: 20px;', width='500px', cellspacing='0', cellpadding='0')
+              tbody
+                tr
+                  td
+                    img.img-responsive(src='https://appdevelopers.xyz/VIIP/public/img/bg/logo-1.png', width='150px;')
+                tr
+                  td
+                    table(style='margin: 10px auto; text-align: center; box-shadow: 0px 0px 3px 0px rgba(0, 0, 0, 0.1); background-color: #fff; border-radius: 4px;', width='100%', cellspacing='0', cellpadding='0')
+                      tbody
+                        tr
+                          td(style='text-align:center; background-color:#d6b666; padding:30px;')
+                            img(src='https://appdevelopers.xyz/VIIP/public/img/bg/double-tick.png', width='100px')
+                        tr
+                          td
+                            h1(style='font-weight:normal;margin:20px 0 0;color:#664b13;') Registration Successful
+                        tr
+                          td
+                            h4(style='text-align:center; margin-bottom:0;color: #525252;')  Hello, #{user.name} 
+                            p(style='letter-spacing:1px;line-height:30px;text-align:center; margin-bottom:30px; padding:10px; padding-left:20px;')
+                              | You have succesfully created your VIIP account.
+                              | Thank you for signing up for your new account at VIIP.
+                              | Follow the link below to confirm your account.
+                            a(href='#{user.link}', style='padding:12px 25px;background-color:#d6b666;border:none;border-radius:2px;cursor:pointer; text-decoration: none;box-shadow: 0 3px 6px -1px rgba(0,0,0,.25);color: #fff;font-weight: bold; border-radius: 20px') Verify Your Account
+                        tr
+                          td(style='height:60px')
+                        //
+                          <tr>
+                          <td>
+                          <p style="line-height:30px;">Copyright © 2020 T. All rights reserved. </p>
+                          </td>
+                          </tr>
