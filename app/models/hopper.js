@@ -45,6 +45,9 @@ const HopperSchema = new mongoose.Schema(
         acc_number: {
           type: Number,
         },
+        stripe_bank_id:{
+          type: String,
+        },
         is_default: {
           type: Boolean,
           default: false,

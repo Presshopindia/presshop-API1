@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"}],"uuid":"efe68c2ce8cb4c7f94d7e4025630678d","collectionName":"fcmdevices","type":"collection"}

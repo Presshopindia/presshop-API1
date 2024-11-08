@@ -176,10 +176,10 @@ module.exports = {
           const searchRegex = new RegExp(data.Hoppers, 'i') //{ $regex: datas.search, $options: 'i' };
           condition.$or = [
             {
-              $or:[
+              $or: [
                 { user_name: searchRegex },
               ]
-            },{
+            }, {
               $expr: {
                 $regexMatch: {
                   input: { $concat: ["$first_name", " ", "$last_name"] },
@@ -187,20 +187,58 @@ module.exports = {
                 }
               }
             }
-            // { stage_name: searchRegex },
-            // { first_name: searchRegex },
-            // { base_location: searchRegex },
-            // { phone_number: searchRegex },
-            // { email: searchRegex },
-            // // { full_name: searchRegex },
-            // { art_form: searchRegex },
           ];
-          // headline = data.search
         }
-        if (data.class) {
+        // if (data.class) {
 
-          condition.category = data.class.toLowerCase();
+        //   condition.category = data.class.toLowerCase();
+        // }
+
+
+        if (data.type) {
+          data.type = data.type.split(",")
+          condition.type = { $in: data.type }
         }
+
+
+        if (data.category) {
+          data.category = data.category.split(",")
+          data.category = data.category.map((x) => mongoose.Types.ObjectId(x))
+          condition.category = { $in: data.category }
+        }
+        if (data.startdate && data.endDate) {
+          condition.createdAt = {
+            $gte: new Date(data.startdate),
+            $lte: new Date(data.endDate)
+          }
+
+        }
+        if (data.location_search) {
+          const searchRegex = new RegExp(data.location_search, 'i') //{ $regex: datas.search, $options: 'i' };
+          condition.$or = [
+            {
+              $or: [
+                { address: searchRegex },
+              ]
+            },
+            // {
+            //   $expr: {
+            //     $regexMatch: {
+            //       input: { $concat: ["$first_name", " ", "$last_name"] },
+            //       regex: searchRegex
+            //     }
+            //   }
+            // }
+
+          ];
+
+        }
+
+        if (data.pendingDoc) {
+
+          condition.doc_to_become_pro = { $exists: false }
+        }
+
         const params = [
           {
             $match: condition,
@@ -236,7 +274,7 @@ module.exports = {
                 {
                   $match: {
                     $expr: {
-                      $and: [{ $eq: ["$to", "$$task_id"] }],
+                      $and: [{ $eq: ["$from", "$$task_id"] }],
                     },
                   },
                 },
@@ -259,6 +297,7 @@ module.exports = {
               ratingsforMediahouse: {
                 $avg: "$rating_byhopper.rating",
               },
+              latestrating: { $arrayElemAt: ["$rating_byhopper", -1] },
             },
           },
           {
@@ -270,10 +309,20 @@ module.exports = {
               preserveNullAndEmptyArrays: true,
             },
           },
-
           {
-            $sort: { createdAt: -1 },
+            $addFields: {
+              fullNameTest: {
+                $concat: [{ $toLower: "$first_name" }, " ", { $toLower: "$last_name" }]
+              }
+            }
           },
+          // {
+          //   $sort: { fullName: 1 }
+          // },
+
+          // {
+          //   $sort: { first_name: 1 },
+          // },
         ];
         const facet = {
           //use facet to get total count and data according to limit offset
@@ -291,16 +340,7 @@ module.exports = {
           },
         };
         //check if limit or offset in data object then fetch data accordint to it
-        if (data.hasOwnProperty("limit") && data.hasOwnProperty("offset")) {
-          facet.$facet.data.push(
-            {
-              $skip: Number(data.offset),
-            },
-            {
-              $limit: Number(data.limit),
-            }
-          );
-        }
+
 
         if (data.hasOwnProperty("OldtoNew")) {
           facet.$facet.data.push(
@@ -309,14 +349,34 @@ module.exports = {
             },
           );
         }
-
-        if (data.hasOwnProperty("NewtoOld")) {
+        else if (data.hasOwnProperty("NewtoOld")) {
           facet.$facet.data.push(
             {
               $sort: { createdAt: -1 },
             },
           );
+        } if (data.is_rated == "-1") {
+          facet.$facet.data.push({
+            $sort: { "latestrating.createdAt": -1 },
+          });
+        } else if (data.is_rated == "1") {
+          facet.$facet.data.push({
+            $sort: { "latestrating.createdAt": 1 },
+          });
+        } else {
+          facet.$facet.data.push(
+            {
+              $sort: { fullNameTest: 1 },
+            },
+          );
         }
+        // else {
+        //   facet.$facet.data.push(
+        //     {
+        //       $sort: { first_name: 1 },
+        //     },
+        //   );
+        // }
 
         if (data.hasOwnProperty("HighestRated")) {
           facet.$facet.data.push({
@@ -329,7 +389,16 @@ module.exports = {
             $sort: { ratingsforMediahouse: 1 },
           })
         }
-
+        if (data.hasOwnProperty("limit") && data.hasOwnProperty("offset")) {
+          facet.$facet.data.push(
+            {
+              $skip: Number(data.offset),
+            },
+            {
+              $limit: Number(data.limit),
+            }
+          );
+        }
         params.push(facet); //finally push facet in params
         const result = await model.aggregate(params);
 
@@ -848,7 +917,17 @@ module.exports = {
         }
 
         if (data.Hoppers) {
-          condition1.hopper_name = { $regex: data.Hoppers, $options: "i" }
+          const searchRegex = new RegExp(data.Hoppers, 'i')
+          // condition1.hopper_name = searchRegex 
+          condition1.$or = [
+            {
+              $or: [
+                { "hopper_id.user_name": searchRegex },
+                { hopper_name: searchRegex },
+              ]
+            },
+          ];
+          //{ $regex: data.Hoppers, $options: "i" }
         }
 
         const params = [
@@ -881,6 +960,16 @@ module.exports = {
                     preserveNullAndEmptyArrays: true,
                   },
                 },
+                {
+                  $project: {
+                    _id: 1,
+                    address: 1,
+                    avatar_detail: 1,
+                    user_name: 1,
+                    first_name: 1,
+                    last_name: 1
+                  }
+                }
               ],
               as: "hopper_id",
             },
@@ -897,7 +986,12 @@ module.exports = {
             $addFields: {
               hopper_name: {
                 $concat: ["$hopper_id.first_name", " ", "$hopper_id.last_name"]
-              }
+              },
+              content_length: {
+                
+                $size: { $ifNull: ["$content", []] }
+              
+            },
             }
           },
           {
@@ -939,6 +1033,40 @@ module.exports = {
               preserveNullAndEmptyArrays: true,
             },
           },
+          {
+            $addFields:{
+              category_name:"$categoryData.name"
+            }
+          },
+          {
+            $lookup: {
+              from: "hopperpayments",
+              localField: "_id",
+              foreignField: "content_id",
+              as: "purchasedContent",
+              pipeline: [
+                {
+                  $lookup: {
+                    from: "users",
+                    localField: "media_house_id",
+                    foreignField: "_id",
+                    as: "purchased_mediahouses"
+                  }
+                },
+                {
+                  $project: {
+                    _id: 1,
+                    "purchased_mediahouses.docs": 1,
+                    "purchased_mediahouses.profile_image": 1,
+                    "purchased_mediahouses.company_name": 1,
+                    "purchased_mediahouses.full_name": 1,
+                    "purchased_mediahouses.company_bank_details": 1,
+
+                  }
+                }
+              ]
+            },
+          },
 
           {
             $lookup: {
@@ -962,20 +1090,20 @@ module.exports = {
           // },
         ];
 
-        if(data.status == "published") {
+        if (data.status == "published") {
           params.push(
             {
               $sort: { published_time_date: -1 },
             },
           );
-        } 
-        if(data.status == "pending") {
+        }
+        if (data.status == "pending") {
           params.push(
             {
               $sort: { createdAt: -1 },
             },
           );
-        } 
+        }
         const facet = {
           //use facet to get total count and data according to limit offset
           $facet: {
@@ -1007,6 +1135,49 @@ module.exports = {
         // }
 
         //check if limit or offset in data object then fetch data accordint to it
+
+        if (data.hasOwnProperty("OldtoNew")) {
+          facet.$facet.data.push(
+            {
+              $sort: { createdAt: 1 },
+            },
+          );
+        }
+        if (data.hasOwnProperty("NewtoOld")) {
+          facet.$facet.data.push(
+            {
+              $sort: { createdAt: -1 },
+            },
+          );
+        }
+        if (data.hasOwnProperty("highpaymentrecived")) {
+          facet.$facet.data.push(
+            {
+              $sort: { amount_paid: -1 },
+            },
+          );
+        }
+        if (data.hasOwnProperty("lowpaymentrecived")) {
+          facet.$facet.data.push(
+            {
+              $sort: { amount_paid: 1 },
+            },
+          );
+        }
+        if (data.hasOwnProperty("Highestpricedcontent")) {
+          facet.$facet.data.push(
+            {
+              $sort: { amount_payable_to_hopper: -1 },
+            },
+          );
+        }
+        if (data.hasOwnProperty("Lowestpricedcontent")) {
+          facet.$facet.data.push(
+            {
+              $sort: { amount_payable_to_hopper: 1 },
+            },
+          );
+        }
         if (data.hasOwnProperty("limit") && data.hasOwnProperty("offset")) {
           facet.$facet.data.push(
             // {
@@ -1020,63 +1191,7 @@ module.exports = {
             },
           );
         }
-        if (data.hasOwnProperty("OldtoNew")) {
-          facet.$facet.data.push(
-            {
-              $sort: { createdAt: 1 },
-            },
-          );
-        } 
-        if (data.hasOwnProperty("NewtoOld")) {
-          facet.$facet.data.push(
-            {
-              $sort: { createdAt: -1 },
-            },
-          );
-        } 
-        if (data.hasOwnProperty("highpaymentrecived")) {
-          facet.$facet.data.push(
-            {
-              $sort: { amount_paid: -1 },
-            },
-          );
-        } 
-        if (data.hasOwnProperty("lowpaymentrecived")) {
-          facet.$facet.data.push(
-            {
-              $sort: { amount_paid: 1 },
-            },
-          );
-        } 
-         if (data.hasOwnProperty("Highestpricedcontent")) {
-          facet.$facet.data.push(
-            {
-              $sort: { amount_payable_to_hopper: -1 },
-            },
-          );
-        } 
-       if (data.hasOwnProperty("Lowestpricedcontent")) {
-          facet.$facet.data.push(
-            {
-              $sort: { amount_payable_to_hopper: 1 },
-            },
-          );
-        }
 
-        // else {
-        //   facet.$facet.data.push(
-        //     {
-        //       $sort: { updatedAt: -1 },
-        //     },
-        //   );
-        // }
-        // if (data.status == "published") {
-        //   facet.$facet.data.push(
-        //     {
-        //       $sort: { published_time_date: -1 },
-        //     },
-        //   );
-        // }
         params.push(facet); //finally push facet in params
         const result = await model.aggregate(params);
         resolve({
@@ -1339,6 +1454,7 @@ module.exports = {
       try {
         const condition = {
           role: "MediaHouse",
+          isPermanentBlocked: false
         };
 
         if (data.status) {
@@ -1347,7 +1463,7 @@ module.exports = {
 
         // sorting
 
-        let sorting = { _id: -1 }
+        let sorting = { createdAt: -1 }
 
         if (data.hasOwnProperty("NewtoOld")) {
           sorting = { createdAt: -1 }
@@ -1364,28 +1480,46 @@ module.exports = {
         if (data.hasOwnProperty("LowestRated")) {
           sorting = { ratingsforMediahouse: 1 }
         }
-
+        if (data.is_rated == "-1") {
+          sorting = { "latestrating.createdAt": -1 }
+        } else if (data.is_rated == "1") {
+          sorting = { "latestrating.createdAt": 1 }
+        } 
 
         // filters
         let filters = {}
 
         if (data.Publication_search) {
-          filters = {
-            company_name: {
-              $regex: new RegExp("^" + data.Publication_search + "$", "i")
-            }
-          }
+          const searchRegex = new RegExp(data.Publication_search, 'i')
+          condition.$or = [
+            {
+              $or: [
+                { company_name: searchRegex },
+              ]
+            },
+          ];
         }
 
-        if (data.startdate && data.enddate) {
-          filters = {
-            $expr: {
-              $and: [
-                { $gte: ["$createdAt", new Date(data.startdate)] },
-                { $lte: ["$createdAt", new Date(data.endDate)] }
-              ]
-            }
-          }
+        if (data.startdate && data.endDate) {
+          condition.createdAt = { $lte: new Date(data.endDate), $gte: new Date(data.startdate) }
+          // filters = {
+          //   $expr: {
+          //     $and: [
+          //       { $gte: ["$createdAt", new Date(data.startdate)] },
+          //       { $lte: ["$createdAt", new Date(data.endDate)] }
+          //     ]
+          //   }
+          // }
+        }
+
+
+        if (data.PedingDocuments) {
+          condition.upload_docs = { $exists: true }
+        }
+
+        if (data.search) {
+          const searchRegex = new RegExp(data.search, 'i')
+          condition["office_details.address.complete_address"] = searchRegex
         }
 
         if (data.hasOwnProperty("PendingPublications")) {
@@ -1408,6 +1542,39 @@ module.exports = {
         const params = [
           {
             $match: condition,
+          },
+
+          {
+            $lookup: {
+              from: "users",
+              localField: "_id",
+              foreignField: "media_house_id",
+              as: "mediahouseusers",
+            },
+          },
+          {
+            $addFields: {
+              mediaHouse_user: {
+                $size: "$mediahouseusers",
+              },
+            }
+          },
+
+          {
+            $project: {
+              mediahouseusers:0
+            },
+          },
+          {
+            $lookup: {
+              from: "categories",
+              localField: "user_type_id",
+              foreignField: "_id",
+              as: "user_type_detail",
+            },
+          },
+          {
+            $unwind: { path: "$user_type_detail", preserveNullAndEmptyArrays: true },
           },
           {
             $lookup: {
@@ -1446,7 +1613,7 @@ module.exports = {
                 {
                   $match: {
                     $expr: {
-                      $and: [{ $eq: ["$to", "$$task_id"] }],
+                      $and: [{ $eq: ["$from", "$$task_id"] }],
                     },
                   },
                 },
@@ -1473,10 +1640,7 @@ module.exports = {
           {
             $addFields: {
               console: "$_id",
-              //     // uploadedcontent: "$task_id",
-              //     // acceptedby: "$acepted_task_id",
-              //     // ratingsforh:  "$rating" ,
-
+              latestrating: { $arrayElemAt: ["$rating_byhopper", -1] },
             },
           },
           //   { $group: {
@@ -2685,21 +2849,23 @@ module.exports = {
         }
 
 
-        if (data.sale_status == true) {
-          condition3 = {
-            $expr: {
-              $eq: ["$sourcedContentSummary.paid_status", "paid"],
-            },
-          }
+        if (data.sale_status == true || data.sale_status == "sold") {
+          condition.purchased_qty = { $gt: 0 }
+          // condition3 = {
+          //   $expr: {
+          //     $eq: ["$sourcedContentSummary.paid_status", "paid"],
+          //   },
+          // }
         }
 
 
-        if (data.sale_status == false) {
-          condition3 = {
-            $expr: {
-              $eq: ["$sourcedContentSummary.paid_status", "unpaid"],
-            },
-          };
+        if (data.sale_status == "unsold" || data.sale_status == false) {
+          condition.purchased_qty = { $eq: 0 }
+          // condition3 = {
+          //   $expr: {
+          //     $eq: ["$sourcedContentSummary.paid_status", "unpaid"],
+          //   },
+          // };
         }
 
 
@@ -2723,8 +2889,18 @@ module.exports = {
           condition3.description = like
         }
 
+        // if (data.Publication_search) {
+        //   condition3.company_name = { $regex: new RegExp("^" + data.Publication_search + "$", "i") }
+        // }
         if (data.Publication_search) {
-          condition3.company_name = { $regex: new RegExp("^" + data.Publication_search + "$", "i") }
+          const searchRegex = new RegExp(data.Publication_search, 'i')
+          condition3.$or = [
+            {
+              $or: [
+                { company_name: searchRegex },
+              ]
+            },
+          ];
         }
 
         if (data.hasOwnProperty("Paymentreveived")) {
@@ -2859,18 +3035,20 @@ module.exports = {
               sourcedContentSumSize: {
                 $size: "$sourcedContentSummary",
               },
-              purchased_qty: {
-                $size: {
-                  $filter: {
-                    input: "$sourcedContentSummary",
-                    as: "currdata",
-                    cond: { $eq: ["$$currdata.paid_status", "paid"] },
-                  },
-                },
-              },
+              // purchased_qty: {
+              //   $size: {
+              //     $filter: {
+              //       input: "$sourcedContentSummary",
+              //       as: "currdata",
+              //       cond: { $eq: ["$$currdata.paid_status", "paid"] },
+              //     },
+              //   },
+              // },
               // sale_status: "$sourcedContentSummary.paid_status",         
 
-
+              total_stripe_fee: {
+                $sum: "$transictions_false.stripe_fee",
+              },
 
               total_presshop_commission: {
                 $sum: "$transictions_false.presshop_commission",
@@ -2884,6 +3062,12 @@ module.exports = {
               total_amount_recieved: {
                 $sum: "$transictions_false.amount",
               },
+              purchased_qty: {
+                $size: "$transictions_false",
+              },
+              // total_payment_receivable:{
+              //   $sum: "$transictions_false.amount",
+              // }
             },
           },
           {
@@ -2891,6 +3075,7 @@ module.exports = {
               task_id: "$sourcedContentSummary._id"
             }
           },
+
           {
             $addFields: {
               purchased_content_value: {
@@ -3261,17 +3446,28 @@ module.exports = {
         });
     });
   },
-  async purchasedContent(model, data) {
+  async purchasedContent(model, data, arr) {
     return new Promise(async (resolve, reject) => {
       try {
         // const condition = { paid_status: "paid" }
         const condition = {}
         let condition3 = { purchased_qty: { $gt: 0 } };
 
-        if (data.Publication_search) {
-          condition3 = { company_name: { $regex: new RegExp("^" + data.Publication_search + "$", "i") } }
-        }
+        // if (data.Publication_search) {
+        //   condition3 = { company_name: { $regex: new RegExp("^" + data.Publication_search + "$", "i") } }
+        // }
 
+
+        if (data.Publication_search) {
+          const searchRegex = new RegExp(data.Publication_search, 'i')
+          condition3.$or = [
+            {
+              $or: [
+                { company_name: searchRegex },
+              ]
+            },
+          ];
+        }
         // if (data.hasOwnProperty("Paymentreceived")) {
         //   // condition3 = {
         //   //   $expr: {
@@ -3340,29 +3536,25 @@ module.exports = {
         }
 
 
-
+        let array = arr
+        let typearray = ["shared", "exclusive"]
+        if (data.type) {
+          typearray = data.type
+          condition3.type = {
+            $ne: []
+          }
+        }
+        if (data.category) {
+          array = data.category.map((x) => mongoose.Types.ObjectId(x))
+          condition3.category = {
+            $ne: []
+          }
+        }
 
         const params = [
           {
             $lookup: {
               from: "contents",
-              // let: {
-              //   mediahouse_id: "$_id",
-              // },
-              // pipeline: [
-              //   {
-              //     $match: {
-              //       $expr: {
-              //         $and: [
-              //           {
-              //             $eq: ["$purchased_publication", "$$mediahouse_id"],
-              //             $eq: ["$paid_status", "paid"]
-              //           }
-              //         ]
-              //       }
-              //     },
-              //   },
-              // ],
               foreignField: "purchased_publication",
               localField: "_id",
               as: "purchased_publication",
@@ -3466,6 +3658,27 @@ module.exports = {
           //     preserveNullAndEmptyArrays: true,
           //   },
           // },
+
+          // {
+          //   $lookup: {
+          //     from: "contents",
+          //     foreignField: "Vat.purchased_mediahouse_id",
+          //     localField: "_id",
+          //     as: "purchased_publicationTest",
+          //   },
+          // },
+
+          // {
+          //   $addFields: {
+          //     info: {
+          //       $filter: {
+          //         input: "$payments",
+          //         as: "item",
+          //         cond: { $eq: ["$$item.type", "content"] }
+          //       }
+          //     }
+          //   }
+          // },
           {
             $addFields: {
               total_payment_received: {
@@ -3476,33 +3689,72 @@ module.exports = {
           {
             $addFields: {
               purchased_qty: {
-                $size: "$purchased_publication",
+                $size: {
+                  $filter: {
+                    input: "$payments",
+                    as: "item",
+                    cond: { $eq: ["$$item.type", "content"] }
+                  }
+                }  //"$purchased_publication",
               },
             },
           },
+          // {
+          //   $addFields: {
+          //     purchased_content_value: {
+          //       $sum: "$purchased_publication.amount_paid",
+          //     },
+          //   },
+          // },
           {
             $addFields: {
               purchased_content_value: {
-                $sum: "$purchased_publication.amount_paid",
-              },
-            },
+                $sum: {
+                  $map: {
+                    input: {
+                      $filter: {
+                        input: "$payments",
+                        as: "item",
+                        cond: { $eq: ["$$item.type", "content"] }
+                      }
+                    },
+                    as: "filteredItem",
+                    in: "$$filteredItem.amount"
+                  }
+                }
+              }
+            }
           },
           {
             $addFields: {
               paid_statusfor_hoper: "$purchased_publication.paid_status"
 
             },
-            // $addFields: {
-            //   sale_status: {
-            //     $cond: {
-            //       if: { $in: ["$purchased_publication.paid_status", []] },
-            //       then: "sold",
-            //       else: "Unsold"
-            //     }
-            //   }
-            // }
+          },
+          {
+            $addFields: {
+              category: {
+                $filter: {
+                  input: "$payments",
+                  as: "item",
+                  cond: { $in: ["$$item.category_id", array] }
+                }
+              }
+            },
           },
 
+
+          {
+            $addFields: {
+              type: {
+                $filter: {
+                  input: "$payments",
+                  as: "item",
+                  cond: { $in: ["$$item.payment_content_type", typearray] }
+                }
+              }
+            },
+          },
           // {
           //   $unwind: {
           //     path: "$paid_statusfor_hoper",
@@ -3523,9 +3775,17 @@ module.exports = {
           // },
           {
             $addFields: {
-              total_presshop_commission: {
-                $sum: "$transictions_true.presshop_commission",
+              // total_presshop_commission: {
+              //   $sum: "$transictions_true.presshop_commission",
+              // },
+              total_stripe_fee: {
+                $sum: "$transictions.stripe_fee",
               },
+
+              total_presshop_commission: {
+                $sum: "$transictions.presshop_commission",
+              },
+
               total_amount_payable: {
                 $sum: "$transictions.payable_to_hopper",
               },
@@ -3552,7 +3812,40 @@ module.exports = {
           //     }
           //   }
           // },
+          {
+            $lookup: {
+              from: "ratings",
+              let: { task_id: "$_id" },
 
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [{ $eq: ["$from", "$$task_id"] }],
+                    },
+                  },
+                },
+
+
+
+                {
+                  $addFields: {
+                    value: "$rating"
+
+
+                  },
+                },
+              ],
+              as: "rating_byhopper",
+            },
+          },
+          {
+            $addFields: {
+              ratingsforMediahouse: {
+                $avg: "$rating_byhopper.rating",
+              },
+            },
+          },
           {
             $match: condition3,
           },
@@ -3564,6 +3857,22 @@ module.exports = {
           {
             $sort: conditoin2,
           },
+
+          // {
+          //   $project: {
+          //     profile_image: 1,
+          //     createdAt:1,
+          //     first_name: 1,
+          //     full_name: 1,
+          //     company_name: 1,
+          //     last_name: 1,
+          //     total_presshop_commission: 1,
+          //     total_amount_payable: 1,
+          //     total_amount_paid: 1,
+          //     total_payment_received:1,
+          //     purchased_content_value:1
+          //   }
+          // }
         ];
 
         // const params = [
@@ -3695,7 +4004,7 @@ module.exports = {
           $facet: {
             data: [
               {
-                $match: { ...condition },
+                $match: { ...condition3 },
               },
             ],
             totalCount: [
@@ -3708,6 +4017,24 @@ module.exports = {
         //check if limit or offset in data object then fetch data accordint to it
         if (data.hasOwnProperty("limit") && data.hasOwnProperty("offset")) {
           facet.$facet.data.push(
+            {
+              $project: {
+                profile_image: 1,
+                createdAt: 1,
+                first_name: 1,
+                full_name: 1,
+                company_name: 1,
+                last_name: 1,
+                total_presshop_commission: 1,
+                total_amount_payable: 1,
+                total_amount_paid: 1,
+                total_payment_received: 1,
+                purchased_content_value: 1,
+                purchased_qty: 1,
+                type: 1,
+                category: 1
+              }
+            },
             {
               $skip: Number(data.offset),
             },
@@ -4187,30 +4514,95 @@ module.exports = {
           sortby = {
             createdAt: 1
           }
+        } else if (data.hasOwnProperty("Highestpricedcontent")) {
+          sortby = {
+            uploaded_content_val: -1
+          }
+        } else if (data.hasOwnProperty("Lowestpricedcontent")) {
+          sortby = {
+            uploaded_content_val: 1
+          }
+        } else if (data.HighestPaymentReceived) {
+          sortby = {
+            total_amount_recieved: -1
+          }
+        } else if (data.LowestPaymentReceived) {
+          sortby = {
+            total_amount_recieved: 1
+          }
         } else {
           sortby = {
-            createdAt: -1
+            createdAt: 1
           }
         }
         // filters
 
         let filters = {}
         if (data.hasOwnProperty("PaymentPaid")) {
-          filters = {
-            total_amount_paid: { $gt: 0 }
-          }
+          condition2.total_amount_paid = {
+            $gt: 0
+          };
+          // filters = {
+          //   total_amount_paid: { $gt: 0 }
+          // }
         }
 
-        if (data.hasOwnProperty("PaymentPayable")) {
-          filters = {
-            total_amount_payable: { $gt: 0 }
-          }
+        // if (data.hasOwnProperty("PaymentPayable")) {
+        //   filters = {
+        //     total_amount_payable: { $gt: 0 }
+        //   }
+        // }
+
+
+        let condition2 = {};
+
+        if (data.sale_status == "sold") {
+          condition2.ValueOfSoldUploadedContent = {
+            $gt: [{ $size: "$ValueOfSoldUploadedContent" }, 0]
+          };
+        } else if (data.sale_status == "unsold") {
+          condition2.ValueOfUnSoldUploadedContent = {
+            $gt: [{ $size: "$ValueOfUnSoldUploadedContent" }, 0]
+          };
         }
 
-        if (data.Hopper_Search) {
-          filters = {
-            first_name: { $regex: data.Hopper_Search, $options: "i" }
-          }
+        if (data.paymentPayable) {
+          condition2.total_amount_payable = {
+            $gt: 0
+          };
+        }
+        // let  condition2 ={}
+        // if (data.sale_status == "sold") {
+        //   condition2.ValueOfSoldUploadedContent = {
+        //     $gt: 0
+        //   }
+        // } else if (data.sale_status == "unsold") {
+        //   condition2.ValueOfUnSoldUploadedContent = {
+        //     $gt: 0
+        //   }
+        // }
+        if (data.Hoppers) {
+          const searchRegex = new RegExp(data.Hoppers, 'i')
+
+          condition.$or = [
+            {
+              $or: [
+                { user_name: searchRegex },
+              ]
+            }, {
+              $expr: {
+                $regexMatch: {
+                  input: { $concat: ["$first_name", " ", "$last_name"] },
+                  regex: searchRegex
+                }
+              }
+            }
+          ];
+
+
+          // filters = {
+          //   first_name: { $regex: data.Hopper_Search, $options: "i" }
+          // }
         }
 
 
@@ -4245,6 +4637,78 @@ module.exports = {
               path: "$employee_details",
               preserveNullAndEmptyArrays: true,
             },
+          },
+          {
+            $lookup: {
+              from: "uploadcontents",
+              localField: "_id",
+              foreignField: "hopper_id",
+              as: "uploaded_contents",
+            },
+          },
+
+          {
+            $addFields: {
+              ValueOfUnSoldUploadedContent: {
+                $filter: {
+                  input: "$uploaded_contents",
+                  as: "item",
+                  cond: { $eq: ["$$item.paid_status", false] }
+                }
+              },
+
+            }
+
+          },
+
+
+          {
+            $addFields: {
+              ValueOfSoldUploadedContent: {
+                $filter: {
+                  input: "$uploaded_contents",
+                  as: "item",
+                  cond: { $eq: ["$$item.paid_status", true] }
+                }
+              },
+
+            }
+          },
+
+
+          {
+            $addFields: {
+              ValueOfPaidToHopperUploadedContent: {
+                $filter: {
+                  input: "$uploaded_contents",
+                  as: "item",
+                  cond: { $eq: ["$$item.paid_status_to_hopper", true] }
+                }
+              },
+
+            }
+          },
+          {
+            $addFields: {
+              ValueOfPaidToHopperFalseseUploadedContent: {
+                $filter: {
+                  input: "$uploaded_contents",
+                  as: "item",
+                  cond: {
+                    $and: [
+                      { $eq: ["$$item.paid_status", true] },
+                      { $eq: ["$$item.paid_status_to_hopper", false] }
+                    ]
+                  }//{ $eq: ["$$item.paid_status_to_hopper", false] }
+                }
+              },
+
+            }
+          },
+
+
+          {
+            $match: condition2,
           },
           {
             $lookup: {
@@ -4373,10 +4837,11 @@ module.exports = {
               transictions_true: 1,
               task_id: "$accepted_tasks.task_id",
               avatar: "$avtar_image.avatar",
-              log: "$accepted_tasks.taskDetails",
+              // log: "$accepted_tasks.taskDetails",
               // firstValue: {
               //   $size: { $arrayElemAt: ["$accepted_tasks.taskDetails", 0] },
               // },
+              uploaded_contents: 1,
               accepted_tasks: {
                 $size: "$accepted_tasks",
               },
@@ -4391,17 +4856,56 @@ module.exports = {
               uploaded_content_remarks: 1,
               employee_name: "$employee_details.name",
               total_presshop_commission: {
-                $sum: "$transictions_false.presshop_commission",
+                $sum: {
+                  $map: {
+                    input: "$ValueOfSoldUploadedContent",
+                    as: "content",
+                    in: { $toDouble: "$$content.commition_to_payable" },
+                  },
+                }
               },
+
               total_amount_payable: {
-                $sum: "$transictions_false.payable_to_hopper",
+                $sum: {
+                  $map: {
+                    input: "$ValueOfPaidToHopperFalseseUploadedContent",
+                    as: "content",
+                    in: { $toDouble: "$$content.amount_payable_to_hopper" },
+                  },
+                }
               },
+
               total_amount_paid: {
-                $sum: "$transictions_true.amount_paid_to_hopper",
+                $sum: {
+                  $map: {
+                    input: "$ValueOfPaidToHopperUploadedContent",
+                    as: "content",
+                    in: { $toDouble: "$$content.amount_payable_to_hopper" },
+                  },
+                }
               },
               total_amount_recieved: {
-                $sum: "$transictions_false.amount",
+                $sum: {
+                  $map: {
+                    input: "$ValueOfSoldUploadedContent",
+                    as: "content",
+                    in: { $toDouble: "$$content.amount_paid" },
+                  },
+                }
               },
+
+              // total_presshop_commission: {
+              //   $sum: "$transictions_false.presshop_commission",
+              // },
+              // total_amount_payable: {
+              //   $sum: "$transictions_false.payable_to_hopper",
+              // },
+              // total_amount_paid: {
+              //   $sum: "$transictions_true.amount_paid_to_hopper",
+              // },
+              // total_amount_recieved: {
+              //   $sum: "$transictions_false.amount",
+              // },
             },
           },
 
@@ -4443,12 +4947,23 @@ module.exports = {
         ];
 
         // const facet = {
+        //   //use facet to get total count and data according to limit offset
         //   $facet: {
-        //     data: {
-
-        //     }
-        //   }
-        // }
+        //     data: [
+        //       {
+        //         $match: { ...condition },
+        //       },
+        //       // {
+        //       //   $match: { ...condition2 },
+        //       // },
+        //     ],
+        //     totalCount: [
+        //       {
+        //         $count: "count",
+        //       },
+        //     ],
+        //   },
+        // };
 
         // if (data.hasOwnProperty("limit") && data.hasOwnProperty("offset")) {
         //   facet.$facet.data.push(
@@ -4462,6 +4977,54 @@ module.exports = {
         // }
 
         // params.push(facet);
+
+
+        // if (data.hasOwnProperty("OldtoNew")) {
+        //   facet.$facet.data.push(
+        //     {
+        //       $sort: { createdAt: 1 },
+        //     },
+        //   );
+        // }
+        // if (data.hasOwnProperty("NewtoOld")) {
+        //   facet.$facet.data.push(
+        //     {
+        //       $sort: { createdAt: -1 },
+        //     },
+        //   );
+        // }
+        // if (data.hasOwnProperty("highpaymentrecived")) {
+        //   facet.$facet.data.push(
+        //     {
+        //       $sort: { amount_paid: -1 },
+        //     },
+        //   );
+        // }
+        // if (data.hasOwnProperty("lowpaymentrecived")) {
+        //   facet.$facet.data.push(
+        //     {
+        //       $sort: { amount_paid: 1 },
+        //     },
+        //   );
+        // }
+        // if (data.hasOwnProperty("Highestpricedcontent")) {
+        //   facet.$facet.data.push(
+        //     {
+        //       $sort: { amount_payable_to_hopper: -1 },
+        //     },
+        //   );
+        // }
+        // if (data.hasOwnProperty("Lowestpricedcontent")) {
+        //   facet.$facet.data.push(
+        //     {
+        //       $sort: { amount_payable_to_hopper: 1 },
+        //     },
+        //   );
+        // }
+
+
+        // params.push(facet); //finally push facet in params
+        // const result = await model.aggregate(params);
         const result = await model.aggregate(params);
         resolve({
           uploadedContentSummeryHopper: result,
@@ -4621,7 +5184,7 @@ module.exports = {
                 $sum: "$transictions_false.payable_to_hopper",
               },
               total_payment_earned: { $sum: "$transictions.payable_to_hopper" },
-              total_presshop_commission: { $sum: "$transictions.presshop_commission" },
+              total_presshop_commission: { $sum: "$transictions_false.presshop_commission" },
               employee_name: "$employee_details.name",
               published_content_admin_employee_id_date: 1,
             },
@@ -5136,22 +5699,22 @@ module.exports = {
           //   },
           // },
           // {
-          //       $lookup: {
-          //         from: "users",
-          //         let: { task_id: "$acceptedby." },
+          //   $lookup: {
+          //     from: "users",
+          //     let: { task_id: "$acceptedby" },
 
-          //         pipeline: [
-          //           {
-          //             $match: {
-          //               $expr: {
-          //                 $and: [{ $eq: ["$_id", "$$task_id"] }],
-          //               },
-          //             },
+          //     pipeline: [
+          //       {
+          //         $match: {
+          //           $expr: {
+          //             $and: [{ $eq: ["$_id", "$$task_id"] }],
           //           },
-          //         ],
-          //         as: "category_details",
+          //         },
           //       },
-          //     },
+          //     ],
+          //     as: "category_details",
+          //   },
+          // },
         ];
 
         const facet = {

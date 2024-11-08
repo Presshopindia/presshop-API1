@@ -2,9 +2,9 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt-nodejs");
 const validator = require("validator");
 const mongoosePaginate = require("mongoose-paginate-v2");
-const uuid = require("uuid");
+// const uuid = require("uuid");
 const User = require("./user");
-
+const { v4: uuidv4 } = require('uuid');
 const UserMediaHouse = new mongoose.Schema(
   {
     media_house_email: {
@@ -55,6 +55,14 @@ const UserMediaHouse = new mongoose.Schema(
     user_last_name: String,
     user_email: String,
     designation: String,
+    designation_id: {
+      type: mongoose.Types.ObjectId,
+      ref: "Category",
+    },
+    department_id: {
+      type: mongoose.Types.ObjectId,
+      ref: "Category",
+    },
     select_office_name: String,
     select_user_office_department: String,
     min_price: String,
@@ -96,7 +104,7 @@ const UserMediaHouse = new mongoose.Schema(
 
     office_id: {
       type: mongoose.Types.ObjectId,
-      //   ref: "Avatar",
+        ref: "OfficeDetail",
     },
     media_house_status: {
       type: Boolean,
@@ -108,8 +116,28 @@ const UserMediaHouse = new mongoose.Schema(
     // encrypted_password:{
     //   type:String
     // }
+
+
+    wallet_id: {
+      type: String,
+      default: uuidv4,
+      unique: true,
+  
+    },
+    wallet_amount: {
+      type: Number,
+      default:0
+    },
+    wallet_status: {
+      type: String,
+      default:"active"
+    },
     admin_rignts: {
       allowed_to_onboard_users: {
+        type: Boolean,
+        default: false
+      },
+      allow_to_chat_externally:{
         type: Boolean,
         default: false
       },

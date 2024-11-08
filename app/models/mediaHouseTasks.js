@@ -73,6 +73,10 @@ const TaskSchema = new mongoose.Schema(
           type: String,
           required: true,
         },
+        thumbnail: {
+          type: String,
+          required: false,
+        },
         media_type: {
           type: String,
           enum: ["image", "video", "audio"],
@@ -169,6 +173,22 @@ const TaskSchema = new mongoose.Schema(
     // default:[]}
       ],
       
+      total_vat_value_invested_in_task:{
+        type:Number,
+        default:0
+      },
+      total_amount_with_vat_invested_in_task:{
+        type:Number,
+        default:0
+      },
+      total_stripefee_value_invested_in_task:{
+        type:Number,
+        default:0
+      },
+      total_uploaded_content_value_in_task:{
+        type:Number,
+        default:0
+      },
       Vat:Array,
       totalfund_invested:Array
   },

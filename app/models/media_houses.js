@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 const User = require("./user");
-
+const { v4: uuidv4 } = require('uuid');
 const MediaHouseSchema = new mongoose.Schema(
   {
     full_name: {
@@ -11,11 +11,11 @@ const MediaHouseSchema = new mongoose.Schema(
     first_name: {
       type: String,
       required: true,
-    },  
+    },
     last_name: {
       type: String,
       required: true,
-    }, 
+    },
 
     user_id: {
       type: mongoose.Types.ObjectId,
@@ -114,12 +114,12 @@ const MediaHouseSchema = new mongoose.Schema(
       first_name: {
         type: String,
         // required: true,
-      },  
+      },
       last_name: {
         type: String,
         // required: true,
-      }, 
-  
+      },
+
       office_type: {
         type: mongoose.Types.ObjectId,
       },
@@ -149,7 +149,7 @@ const MediaHouseSchema = new mongoose.Schema(
     },
     source_content_employee: {
       type: mongoose.Types.ObjectId,
-      ref:"Admin"
+      ref: "Admin"
     },
     remarks: {
       type: String,
@@ -160,6 +160,10 @@ const MediaHouseSchema = new mongoose.Schema(
     },
     admin_rignts: {
       allowed_to_onboard_users: {
+        type: Boolean,
+        default: false
+      },
+      allow_to_chat_externally:{
         type: Boolean,
         default: false
       },
@@ -219,16 +223,16 @@ const MediaHouseSchema = new mongoose.Schema(
       default: false
     },
 
-    docs:[
+    docs: [
       {
         name: {
           type: String,
         },
-        type:{
+        type: {
           type: String,
         },
-        url:String
-    }
+        url: String
+      }
 
     ],
     upload_docs: {
@@ -240,19 +244,19 @@ const MediaHouseSchema = new mongoose.Schema(
       govt_id: {
         type: String,
       },
-      govt_id_mediatype:{
+      govt_id_mediatype: {
         type: String,
       },
       photography_licence: {
         type: String,
       },
-      photography_mediatype:{
+      photography_mediatype: {
         type: String,
       },
       comp_incorporation_cert: {
         type: String,
       },
-      comp_incorporation_cert_mediatype:{
+      comp_incorporation_cert_mediatype: {
         type: String,
       },
       // documents: [{
@@ -301,8 +305,20 @@ const MediaHouseSchema = new mongoose.Schema(
       default: "offline",
     },
 
-
-
+    wallet_id: {
+      type: String,
+      default: uuidv4,
+      unique: true,
+  
+    },
+    wallet_amount: {
+      type: Number,
+      default:0
+    },
+    wallet_status: {
+      type: String,
+      default:"active"
+    }
   },
   {
     toJSON: {

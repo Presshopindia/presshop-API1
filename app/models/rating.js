@@ -21,13 +21,14 @@ const ratingSchema = new mongoose.Schema(
     task_content_id: {
       type: mongoose.Types.ObjectId,
       // required: true,
-      ref: "UploadedContent",
+      ref: "Uploadcontent",
     },
     type:String,
     product_id:String,
     review:String,
     rating:Number,
     sender_type:String,
+    features:Array
   },
   {
     versionKey: false,

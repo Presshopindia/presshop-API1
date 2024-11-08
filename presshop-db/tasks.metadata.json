@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"address_location":"2dsphere"},"name":"address_location_2dsphere","sparse":false,"2dsphereIndexVersion":{"$numberInt":"3"}}],"uuid":"013bcce418b84a02bfb4f88886b8bb44","collectionName":"tasks","type":"collection"}

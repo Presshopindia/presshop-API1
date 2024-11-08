@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Onboard new user</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    @font-face {
+      font-family: "Airbnb";
+      src: local("AirbnbCereal_W_Lt"),
+        url("/airbnb-cereal-font/AirbnbCereal_W_Lt.ttf") format("truetype");
+    }
+
+    @font-face {
+      font-family: "AirbnbMedium";
+      src: local("AirbnbCereal_W_Md"),
+        url("/airbnb-cereal-font/AirbnbCereal_W_Md.ttf") format("truetype");
+    }
+
+    @font-face {
+      font-family: "AirbnbBold";
+      src: local("AirbnbCereal_W_Bd"),
+        url("/airbnb-cereal-font/AirbnbCereal_W_Bd.ttf") format("truetype");
+    }
+  </style>
+</head>
+
+<body style="
+      width: 100%;
+      height: 100%;
+      background: #e6e6e6;
+      margin: 0;
+      box-sizing: border-box;
+      text-align: left;
+      font-weight: 390;
+    ">
+  <table cellspacing="0" cellpadding="0" width="100%" style="
+        background-color: #fff;
+        padding: 0;
+        border-collapse: collapse;
+        margin: 0px auto;
+        max-width: 100%;
+        font-size: 14px;
+      " border="0">
+    <tbody>
+      <tr style="">
+        <td style="text-align: left; padding: 0 60px; background-color: #f3f5f4">
+          <img src="https://uat.presshop.live/presshop_rest_apis/views/en/logo.png" alt="Presshop Logo" style="width: 200px; height: auto; margin: 25px 0px" />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <table width="100%" cellspacing="0">
+            <tr>
+              <td width="50%" style="padding: 60px 55.5px 40px 55.5px; vertical-align: top">
+                <p style="
+                      margin-bottom: 60px;
+                      margin-top: 0;
+                      font-family: AirbnbBold;
+                      font-size: 40px;
+                      letter-spacing: 0;
+                    ">
+                  Hi <%= mediaHouse %>, let's get <%= userName %> onboarded
+                </p>
+                <p style="
+                      font-family: Airbnb;
+                      font-size: 15px;
+                      line-height: 24px;
+                      margin-bottom: 25px;
+                      text-align: justify;
+                    ">
+                  Please complete the onboarding formalities by clicking the button below. As the official
+                  administrator, you are responsible for carefully entering details of the new user, and assigning
+                  platform rights.
+                </p>
+                <p style="
+                      font-family: Airbnb;
+                      font-size: 15px;
+                      line-height: 24px;
+                      margin-bottom: 40px;
+                      text-align: justify;
+                    ">
+                  If you need any assistance on how to onboard a new user, please watch our onboarding <a
+                    style="color: #ec4e54; font-family: AirbnbMedium; cursor: pointer;">videos</a> below. You can also <a
+                    style="color: #ec4e54; font-family: AirbnbMedium; cursor: pointer;">contact us</a> and speak to our helpful team
+                  members who will be glad to assist you. Thanks
+                </p>
+                <!-- <table style="width: 100%; padding-bottom: 50px;">
+                  <tr>
+                    <td style="vertical-align: top; padding-bottom: 15px;">
+                      <img src="imgs/ttrl1.png" style="border-radius: 10px; width: 232px;" alt="">
+                      <p style="margin: 0; width: 232px;">Check our interactive features here</p>
+                    </td>
+                    <td style="vertical-align: top; padding-bottom: 15px;">
+                      <img src="imgs/ttrl2.png" style="border-radius: 10px;" width="232px" alt="">
+                      <p style="margin: 0; width: 232px;">Learn how to post tasks, and source content from our users</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="text-align: end;" colspan="2">
+                      <p style="text-align: end; margin: 0; font-size: 14px; font-family: AirbnbBold; display: flex;align-items: center;justify-content: end;">
+                        View all
+                        <img src="imgs/arrow-right.png" style="margin-left: 9px;
+                        width:21px; height:auto;">
+
+                      </p>
+                    </td>
+                  </tr>
+                </table> -->
+
+                <button style="
+                      width: 100%;
+                      background: #ec4e54;
+                      border: unset;
+                      padding: 10px 0px;
+                      border-radius: 12px;
+                      color: #ffffff;
+                      font-family: 'AirbnbBold';
+                      font-size: 15px;
+                      cursor: pointer;
+                    ">
+                  <a href="https://presshop-mediahouse.web.app/signup-user-n/<%= userName %>/<%= company_number %>/<%= vat %>
+                  "
+                  style="color: white; text-decoration: none;"> Onboard Now</a>
+                </button>
+              </td>
+              <td width="50%" style="
+                    padding: 0px 20px;
+                    background: #f3f5f4;
+                    vertical-align: top;
+                  " align="center">
+                <table width="100%">
+                  <tr>
+                    <td height="50" style="background: #f3f5f4"></td>
+                  </tr>
+                  <!-- <tr>
+                      <td
+                        style="
+                          background: #f3f5f4;
+                          text-align: center;
+                          padding-left: 20px;
+                          padding-bottom: 12px;
+                        "
+                      >
+                        <img
+                          src="https://uat.presshop.live/presshop_rest_apis/public/tempate-data/imgs/triangle.png"
+                          alt="triangle"
+                          style="width: 26px"
+                        />
+                      </td>
+                    </tr> -->
+                </table>
+                <img src="https://uat.presshop.live/presshop_rest_apis/public/tempate-datahttps://uat.presshop.live/presshop_rest_apis/public/tempate-data/imgs/onboard_new_usr.png" style="
+                      object-fit: cover;
+                      width: 640px;
+                      height: 720px;
+                      pointer-events: none;
+                      user-select: none;
+                    " />
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td></td>
+      </tr>
+      <tr>
+        <td style="background: #f3f5f4; padding: 40px 60px">
+          <table width="100%">
+            <tr>
+              <td width="50%">
+                <img src="https://uat.presshop.live/presshop_rest_apis/public/tempate-datahttps://uat.presshop.live/presshop_rest_apis/public/tempate-data/imgs/footerlogo.png" alt="" width="386px" height="auto" />
+                <p style="
+                      margin-top: 25px;
+                      font-size: 15px;
+                      font-weight: bold;
+                      font-family: 'Work Sans', sans-serif;
+                      margin-bottom: 3px;
+                    ">
+                  Presso Media UK Limited
+                </p>
+                <p style="
+                      margin-top: 0px;
+                      font-size: 15px;
+                      font-weight: 300;
+                      font-family: 'Work Sans', sans-serif;
+                      margin-bottom: 5px;
+                    ">
+                  1 Knightsbridge Green
+                  <br />
+                  London
+                  <br />
+                  SW1X 7QA
+                  <br />
+                  United Kingdom
+                </p>
+                <p style="
+                      margin-top: 0px;
+                      font-size: 15px;
+                      font-weight: 300;
+                      font-family: 'Work Sans', sans-serif;
+                      margin-bottom: 5px;
+                    ">
+                  <img src="https://uat.presshop.live/presshop_rest_apis/public/tempate-datahttps://uat.presshop.live/presshop_rest_apis/public/tempate-data/imgs/emailic.png" alt="Email icon" style="width: 15px; height: auto" />
+                  support@presshop.news
+                </p>
+                <p style="
+                      margin-top: 0px;
+                      font-size: 15px;
+                      font-weight: 300;
+                      font-family: 'Work Sans', sans-serif;
+                      margin-bottom: 15px;
+                    ">
+                  <img src="https://uat.presshop.live/presshop_rest_apis/public/tempate-datahttps://uat.presshop.live/presshop_rest_apis/public/tempate-data/imgs/websiteic.png" alt="Website icon" style="width: 15px; height: auto" />
+                  www.presshop.news
+                </p>
+                <img src="https://uat.presshop.live/presshop_rest_apis/public/tempate-datahttps://uat.presshop.live/presshop_rest_apis/public/tempate-data/imgs/twitter.png" alt="" style="width: 28px; height: auto" />
+                <img src="https://uat.presshop.live/presshop_rest_apis/public/tempate-datahttps://uat.presshop.live/presshop_rest_apis/public/tempate-data/imgs/linkedIn.png" alt="" style="width: 28px; height: auto" />
+                <img src="https://uat.presshop.live/presshop_rest_apis/public/tempate-datahttps://uat.presshop.live/presshop_rest_apis/public/tempate-data/imgs/instagram.png" alt="" style="width: 28px; height: auto" />
+                <img src="https://uat.presshop.live/presshop_rest_apis/public/tempate-datahttps://uat.presshop.live/presshop_rest_apis/public/tempate-data/imgs/fb.png" alt="" style="width: 28px; height: auto" />
+              </td>
+              <td width="50%" align="right" style="vertical-align: bottom">
+                <p style="
+                      font-size: 15px;
+                      font-family: 'Work Sans', sans-serif;
+                      margin-bottom: 15px;
+                      font-weight: 500;
+                      font-family: 'Work Sans', sans-serif;
+                      width: 337px;
+                      text-align: left;
+                    ">
+                  Disclaimer
+                </p>
+                <p style="
+                      margin-bottom: 30px;
+                      font-size: 12px;
+                      font-weight: 400;
+                      font-family: 'Work Sans', sans-serif;
+                      width: 337px;
+                      text-align: justify;
+                    ">
+                  If you have received this email in error please notify
+                  Presso Media UK Limited immediately. This message contains
+                  confidential information and is intended only for the
+                  individual named. If you are not the named addressee, you
+                  should not disseminate, distribute or copy this e-mail.
+                </p>
+                <img src="https://uat.presshop.live/presshop_rest_apis/public/tempate-datahttps://uat.presshop.live/presshop_rest_apis/public/tempate-data/imgs/appStore.png" alt="Appstore" style="width: 118px; height: auto" />
+                <img src="https://uat.presshop.live/presshop_rest_apis/public/tempate-datahttps://uat.presshop.live/presshop_rest_apis/public/tempate-data/imgs/googlePlay.png" alt="googlePlay store" style="width: 118px; height: auto" />
+              </td>
+            </tr>
+            <!-- <tr>
+				<td>
+					<img src="https://uat.presshop.live/presshop_rest_apis/public/tempate-data/imgs/twitter.png" alt="" style="width: 28px; height: auto;">
+					<img src="https://uat.presshop.live/presshop_rest_apis/public/tempate-data/imgs/linkedIn.png" alt="" style="width: 28px; height: auto;">
+					<img src="https://uat.presshop.live/presshop_rest_apis/public/tempate-data/imgs/instagram.png" alt="" style="width: 28px; height: auto;">
+					<img src="https://uat.presshop.live/presshop_rest_apis/public/tempate-data/imgs/fb.png" alt="" style="width: 28px; height: auto;">
+				</td>
+			  </tr> -->
+          </table>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+
+</html>

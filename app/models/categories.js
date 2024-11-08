@@ -26,7 +26,8 @@ const CategorySchema = new mongoose.Schema(
         "commissionstructure",
         "designation",
         "officeType",
-        "tasks"
+        "tasks",
+        "user_type"
       ],
       required: true,
     },

@@ -28,6 +28,26 @@
         src: local("AirbnbCereal_W_Bd"),
           url("/airbnb-cereal-font/AirbnbCereal_W_Bd.ttf") format("truetype");
       }
+      @media  (max-width: 1024px) {
+        .big-image{
+          height: 620px;
+          object-fit: cover;
+          width: 478px !important;
+          pointer-events: none;
+          user-select: none;
+        }
+      }
+      @media (max-width: 834px){
+        .big-image{
+          height: 620px;
+          object-fit: contain !important;
+          width: 410px !important;
+          pointer-events: none;
+          user-select: none;
+        }
+
+      }
+
     </style>
   </head>
 
@@ -107,7 +127,7 @@
                       text-align: justify;
                     "
                   >
-                  Please click the <a href="https://presshop-mediahouse.web.app/login" style="color: #ec4e54; font-family: AirbnbMedium">Log In</a> button below, to verify yourself and log onto the <b>Presshop</b> platform. If you have forgotten your password, please <a style="color: #ec4e54; font-family: AirbnbMedium">click here</a> and we will help create a new password for you. This happens to most of us, and is absolutely fine.
+                  Please click the <a href="https://new-presshop-mediahouse.web.app/login" style="color: #ec4e54; font-family: AirbnbMedium">Log In</a> button below, to verify yourself and log onto the <b>Presshop</b> platform. If you have forgotten your password, please <a href = "https://new-presshop-mediahouse.web.app/User-Forget-Password" style="color: #ec4e54; font-family: AirbnbMedium">click here</a> and we will help create a new password for you. This happens to most of us, and is absolutely fine.
                   </p>
                   <p
                     style="
@@ -121,7 +141,7 @@
                   If you face any trouble logging in, please <a style="color: #ec4e54; font-family: AirbnbMedium">
                     contact
                   </a> our helpful team members who will be happy to assist. See you on the other side. Cheers!</p>
-                  <button
+                  <button href="https://new-presshop-mediahouse.web.app/login"
                     style="
                       width: 100%;
                       width: 100%;
@@ -169,6 +189,7 @@
                   </table>
                   <img
                     src="https://uat.presshop.live/presshop_rest_apis/views/en/onboard-mediahouse.png"
+                    class="big-image"
                     style="height: 620px;
                     object-fit: cover;
                     width: 628px;

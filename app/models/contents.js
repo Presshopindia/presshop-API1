@@ -6,12 +6,15 @@ const ContentSchema = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       ref: "User",
     },
-    content_view_type:String,
+    content_view_type: String,
     user_id: {
       type: mongoose.Types.ObjectId,
       ref: "Admin",
     },
-
+    donot_share: {
+      type: Boolean,
+      default: false,
+    },
     content: [
       {
         media: {
@@ -27,10 +30,13 @@ const ContentSchema = new mongoose.Schema(
           type: String,
           // required: true,
         },
-
+        image_name: {
+          type: String,
+          required: false,
+        },
         media_type: {
           type: String,
-          enum: ["image", "video", "audio", "pdf", "doc"],
+          // enum: ["image", "video", "audio", "pdf", "doc"],
           default: "image",
         },
       },
@@ -136,7 +142,7 @@ const ContentSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["published", "pending", "rejected"],
+      enum: ["published", "pending", "rejected", "blocked"],
       default: "pending",
     },
     favourite_status: {
@@ -146,6 +152,9 @@ const ContentSchema = new mongoose.Schema(
     },
 
     ask_price: {
+      type: Number,
+    },
+    original_ask_price: {
       type: Number,
     },
     amount_paid: {
@@ -230,9 +239,16 @@ const ContentSchema = new mongoose.Schema(
     },
     purchased_mediahouse_time: [
       {
-        type: mongoose.Types.ObjectId,
-        ref: "User",
-        default: []
+        media_house_id: {
+          type: mongoose.Types.ObjectId,
+          ref: "User",
+          default: []
+        },
+        is_hide: {
+          type: Boolean,
+          // default: false
+        },
+
       }
     ],
     purchased_mediahouse: [
@@ -262,8 +278,30 @@ const ContentSchema = new mongoose.Schema(
         amount: {
           type: String,
         },
+        amount_without_Vat: {
+          type: Number,
+        },
         purchased_time: {
           type: Date
+        },
+
+        purchased_content_type: {
+          type: String
+        },
+        transaction_id: {
+          type: String
+        },
+        invoice_number: {
+          type: String
+        },
+        stripe_fee: {
+          type: Number
+        },
+        paybletohopper: {
+          type: Number
+        },
+        presshop_committion: {
+          type: Number
         }
       },
     ],
@@ -290,6 +328,68 @@ const ContentSchema = new mongoose.Schema(
       type: Boolean,
       // default: false,
     },
+    image_count: {
+      type: Number,
+      default: 0
+    }, video_count: {
+      type: Number,
+      default: 0
+    },
+    audio_count: {
+      type: Number,
+      default: 0
+    },
+    other_count: {
+      type: Number,
+      default: 0
+    },
+    content_view_count_by_marketplace_for_app: {
+      type: Number,
+      default: 0
+    },
+
+    isCheck: {
+      type: Boolean,
+      default: false,
+    },
+
+    product_id: {
+      type: String,
+      default: null
+    },
+
+    before_discount_value: {
+      type: String,
+      default: null
+    },
+    discount_valid: {
+      type: String,
+      default: null
+    },
+    discount_percent: {
+      type: String,
+      default: null
+    },
+    sales_prefix: {
+      type: String,
+      default: null
+    },
+    stripe_account_id: String,
+    is_charity: {
+      type: Boolean,
+      default: false
+    },
+
+    payment_intent: [{
+      type: String
+    }],
+    charge_ids: [{
+      type: String
+    }],
+    zip_url: {
+      type: String,
+      // default: false
+    }
   },
 
   {

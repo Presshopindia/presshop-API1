@@ -59,7 +59,7 @@ router.patch(
 );
 
 router.delete(
-  "/deleteBankDetail/:bank_detail_id",
+  "/deleteBankDetail/:bank_detail_id/:stripe_bank_id",
   requireAuth,
   AuthController.roleAuthorization(["Hopper"]),
   trimRequest.all,
@@ -459,4 +459,122 @@ router.post(
   controller.testaudiowatermark
 );
 
+
+router.post(
+  "/updatelocation",
+  trimRequest.all,
+  //  requireAuth,
+  controller.updatelocation
+);
+
+
+router.post(
+  "/createVerificationSession",
+  trimRequest.all,
+  //  requireAuth,
+  controller.createVerificationSession
+);
+
+router.patch(
+  "/updateNotificationforClearAll",
+  trimRequest.all,
+   requireAuth,
+  controller.updateNotificationforClearAll
+);
+
+
+router.post(
+  "/uploadMediaforMultipleContent",
+  trimRequest.all,
+  //  requireAuth,
+  controller.uploadMediaforMultipleImage
+);
+
+
+router.post(
+  "/uploadStipeFiles",
+  trimRequest.all,
+  //  requireAuth,
+  controller.uploadStipeFiles
+);
+
+
+router.get(
+  '/getdetailsbyid',
+  trimRequest.all,
+  // requireAuth,
+  controller.getdetailsbyid
+)
+
+
+
+
+router.get(
+  '/listofcharity',
+  trimRequest.all,
+  // requireAuth,
+  controller.listofcharity
+)
+
+
+
+router.get(
+  '/fetchAndupdateBankdetails',
+  trimRequest.all,
+  requireAuth,
+  controller.fetchAndupdateBankdetails
+)
+
+
+
+
+router.post(
+  "/uploadMultipleImgs",
+  trimRequest.all,
+  //  requireAuth,
+  controller.uploadMultipleProjectImgs
+);
+
+
+
+router.post(
+  "/justgivingapi",
+  trimRequest.all,
+  //  requireAuth,
+  controller.justgivingapi
+);
+
+
+router.get(
+  '/getHopperAlertList',
+  trimRequest.all,
+  requireAuth,
+  controller.getHopperAlertList
+)
+
+
+
+router.patch(
+  "/uploadDocToBecomeProNew",
+  requireAuth,
+  AuthController.roleAuthorization(["Hopper"]),
+  trimRequest.all,
+  controller.uploadDocToBecomeProNew
+);
+
+
+router.get(
+  '/getuploadedDocumentList',
+  trimRequest.all,
+  requireAuth,
+  controller.getuploadedDocumentList
+)
+
+
+router.post(
+  "/deleteDocument",
+  trimRequest.all,
+   requireAuth,
+  controller.deleteDocument
+);
 module.exports = router;

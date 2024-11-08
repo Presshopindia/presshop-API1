@@ -125,7 +125,10 @@ const UserSchema = new mongoose.Schema(
     stripe_account_id: {
       type: String,
     },
-    stripe_status:String,
+    stripe_status:{
+      type: String,
+      default:0
+    },
     send_reminder:{
       type: Boolean,
       default: false,
@@ -144,6 +147,7 @@ const UserSchema = new mongoose.Schema(
       enum: ["online", "offline"],
       default: "offline",
     },
+    dob:String,
     pin_code: String,
     profile_image:String,
     city: String,
@@ -194,8 +198,13 @@ const UserSchema = new mongoose.Schema(
 
     office_id: {
       type: mongoose.Types.ObjectId,
-    //   ref: "Avatar",
+      ref: "OfficeDetail",
     },
+
+    user_type_id:{
+      type: mongoose.Types.ObjectId,
+      ref: "Category",
+    }
   },
   {
     discriminatorKey: "role",

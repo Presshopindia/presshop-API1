@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"}],"uuid":"67402bbc0e154e1981f6d6eb4156472c","collectionName":"hopperpayments","type":"collection"}

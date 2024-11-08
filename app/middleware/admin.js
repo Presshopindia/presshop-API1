@@ -14966,7 +14966,13 @@ exports.sendNotification = async (req, res) => {
         }
 
         const resp = await _sendAdminNotification(notificationObj);
+
+        
         console.log("resp", resp);
+        return res.status(200).json({
+          code: 200,
+          data: "sent",
+        });
       } else {
         return res.status(400).json({
           code: 400,
@@ -14987,10 +14993,10 @@ exports.sendNotification = async (req, res) => {
     // const resp = await _sendAdminNotification(notificationObj);
     // console.log("resp", resp);
 
-    return res.status(200).json({
-      code: 200,
-      data: "sent",
-    });
+    // return res.status(200).json({
+    //   code: 200,
+    //   data: "sent",
+    // });
     // if (resp.length > 0) {
 
     //   return res.status(200).json({

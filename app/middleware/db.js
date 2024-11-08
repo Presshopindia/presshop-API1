@@ -38,7 +38,10 @@ module.exports = {
     });
   },
 
-  async getItemswithsort(model, query, sort) {
+  async getItemswithsort(model, query, sort,data) {
+
+
+    console.log("data-----------",)
     return new Promise((resolve, reject) => {
       model
         .find(query, (err, items) => {
@@ -49,6 +52,14 @@ module.exports = {
         })
         .populate({
           path: "hopper_id",
+          select:"user_name avatar_id",
+          populate: {
+            path: "avatar_id",
+          },
+        })
+        .populate({
+          path: "completed_by",
+          select:"user_name avatar_id",
           populate: {
             path: "avatar_id",
           },
@@ -60,7 +71,46 @@ module.exports = {
             path: "category_id",
           },
         })
-        .sort(sort);
+        .sort(sort).limit(data.limit ?parseInt(data.limit):Number.MAX_SAFE_INTEGER).skip(data.offset ?parseInt(data.offset):0);
+    });
+  },
+
+
+
+  async getItemswithsortOnlyCount(model, query, sort) {
+
+
+    console.log("data-----------",)
+    return new Promise((resolve, reject) => {
+      model
+        .find(query, (err, items) => {
+          if (err) {
+            reject(buildErrObject(422, err.message));
+          }
+          resolve(items);
+        })
+        .populate({
+          path: "hopper_id",
+          select:"user_name avatar_id",
+          populate: {
+            path: "avatar_id",
+          },
+        })
+        .populate({
+          path: "completed_by",
+          select:"user_name avatar_id",
+          populate: {
+            path: "avatar_id",
+          },
+        })
+        .populate("category_id")
+        .populate({
+          path: "content_id",
+          populate: {
+            path: "category_id",
+          },
+        })
+        .sort(sort)
     });
   },
 
@@ -150,16 +200,34 @@ module.exports = {
             { _id: data.user_id, "bank_detail.is_default": true },
             { "bank_detail.$": 1 }
           );
+
+          await model.updateMany(
+            {
+              _id: mongoose.Types.ObjectId(data.user_id),
+            },
+            { $set: { "bank_detail.$[].is_default": false} } // Use the $[] operator for all elements
+          );
+
+
           console.log("findUserBank===>", findUserBank);
           if (findUserBank) {
             console.log("isDefault", data.is_default);
-            await model.updateOne(
-              {
-                _id: data.user_id,
-                "bank_detail._id": findUserBank.bank_detail[0]._id,
-              },
-              { $set: { "bank_detail.$.is_default": false } }
-            );
+            // await model.updateOne(
+            //   {
+            //     _id: data.user_id,
+            //     "bank_detail._id": findUserBank.bank_detail[0]._id,
+            //   },
+            //   { $set: { "bank_detail.$.is_default": false } }
+            // );
+
+
+            // await model.updateMany(
+            //   {
+            //     _id: data.user_id,
+            //     "bank_detail.stripe_bank_id": { $ne: data.stripe_bank_id },
+            //   },
+            //   { $set: { "bank_detail.$[].is_default": false } } // Use the $[] operator for all elements
+            // );
           }
         }
 
@@ -497,32 +565,105 @@ module.exports = {
     });
   },
 
+  // async updateBankDetail(model, data) {
+  //   return new Promise(async (resolve, reject) => {
+  //     try {
+  //       if (data.bank_detail.is_default) {
+  //         const findUserBank = await model.findOne(
+  //           { _id: data.user_id, "bank_detail.is_default": true },
+  //           { "bank_detail.$": 1 }
+  //         );
+  //         console.log("findUserBank===>", findUserBank);
+  //         if (findUserBank) {
+  //           await model.updateOne(
+  //             {
+  //               _id: data.user_id,
+  //               "bank_detail._id": findUserBank.bank_detail[0]._id,
+  //             },
+  //             { $set: { "bank_detail.$.is_default": false } }
+  //           );
+  //         }
+  //       }
+  //       await model.updateOne(
+  //         {
+  //           _id: data.user_id,
+  //           "bank_detail._id": data.bank_detail_id,
+  //         },
+  //         { $set: { "bank_detail.$": data.bank_detail } }
+  //       );
+  //       resolve(true);
+  //     } catch (err) {
+  //       reject(buildErrObject(422, err.message));
+  //     }
+  //   });
+  // },
+
+
   async updateBankDetail(model, data) {
     return new Promise(async (resolve, reject) => {
       try {
-        if (data.bank_detail.is_default) {
-          const findUserBank = await model.findOne(
-            { _id: data.user_id, "bank_detail.is_default": true },
-            { "bank_detail.$": 1 }
-          );
-          console.log("findUserBank===>", findUserBank);
-          if (findUserBank) {
-            await model.updateOne(
-              {
-                _id: data.user_id,
-                "bank_detail._id": findUserBank.bank_detail[0]._id,
-              },
-              { $set: { "bank_detail.$.is_default": false } }
-            );
-          }
-        }
+        // if (data.bank_detail.is_default) {
+        //   const findUserBank = await model.findOne(
+        //     { _id: data.user_id, "bank_detail.is_default": true },
+        //     { "bank_detail.$": 1 }
+        //   );
+        //   console.log("findUserBank===>", findUserBank);
+        //   if (findUserBank) {
+        //     await model.updateOne(
+        //       {
+        //         _id: data.user_id,
+        //         "bank_detail._id": findUserBank.bank_detail[0]._id,
+        //       },
+        //       { $set: { "bank_detail.$.is_default": false } }
+        //     );
+        //   }
+        // }
+
         await model.updateOne(
           {
             _id: data.user_id,
-            "bank_detail._id": data.bank_detail_id,
+            "bank_detail.stripe_bank_id": data.stripe_bank_id,
           },
-          { $set: { "bank_detail.$": data.bank_detail } }
+          {
+            // Update the specified bank detail to set is_default to true
+            $set: {
+              "bank_detail.$.is_default": true,
+            },
+            // Update all other bank details to set is_default to false
+            // $set: {
+            //   "bank_detail": {
+            //     $map: {
+            //       input: "$bank_detail",
+            //       as: "detail",
+            //       in: {
+            //         $mergeObjects: [
+            //           "$$detail",
+            //           { is_default: { $cond: [{ $eq: ["$$detail.stripe_bank_id", data.stripe_bank_id] }, true, false] } }
+            //         ]
+            //       }
+            //     }
+            //   }
+            // }
+          }
         );
+
+
+        // await model.updateMany(
+        //   {
+        //     _id: data.user_id,
+        //     "bank_detail.stripe_bank_id": { $ne: data.stripe_bank_id },
+        //   },
+        //   { $set: { "bank_detail.$[].is_default": false } } // Use the $[] operator for all elements
+        // );
+        
+
+        // await model.updateOne(
+        //   {
+        //     _id: data.user_id,
+        //     "bank_detail.stripe_bank_id": data.stripe_bank_id,
+        //   },
+        //   { $set: { "bank_detail.$.is_default": data.is_default } }
+        // );
         resolve(true);
       } catch (err) {
         reject(buildErrObject(422, err.message));
@@ -575,7 +716,18 @@ module.exports = {
           // { _id: data.user_id },
           // { bank_detail: 1 }
         );
-        resolve(findUserBanks[0].bank_detail);
+
+        if (findUserBanks.length > 0) {
+          const userBanks = findUserBanks[0].bank_detail;
+          // Reorder array to put the first 'true' is_default bank at index 0
+          const sortedUserBanks = [
+            userBanks.find(bank => bank.is_default) || null, // First element: is_default = true
+            ...userBanks.filter(bank => !bank.is_default) // Remaining elements
+          ].filter(Boolean); // Filter out nulls if no default is found
+        
+          findUserBanks[0].bank_detail = sortedUserBanks; // Update the original result
+        }
+        resolve(findUserBanks[0]?.bank_detail);
       } catch (err) {
         reject(buildErrObject(422, err.message));
       }
@@ -621,7 +773,53 @@ module.exports = {
               preserveNullAndEmptyArrays: true,
             },
           },
+          {
+            $lookup: {
+              from: "chats",
+              let: { hopper_id: "$_id" },
 
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        { $eq: ["$image_id", "$$hopper_id"] },
+                        { $eq: ["$sender_type", "Mediahouse"] },
+                        { $eq: ["$message_type", "Mediahouse_initial_offer"] },
+                        { $eq: ["$paid_status", false] }
+                      ],
+                    },
+                  },
+                },
+
+
+
+                {
+                  $addFields: {
+                    current_offers: {
+                      $cond: {
+                        if: {
+                          $and: [
+                            { $eq: ["$paid_status", false] },
+                            // { $eq: ["$paid_status", true] }, // Additional condition
+                          ],
+                        },
+                        then: 1,
+                        else: 0,
+                      },
+                    },
+                  },
+                },
+              ],
+              as: "offsered_mediahouse",
+            },
+          },
+          {
+            $addFields: {
+              offer_content_size: { $size: "$offsered_mediahouse" },
+              current_offers_of_mediahouse: "$offsered_mediahouse.current_offers",
+            },
+          },
           // {
           //   $lookup: {
           //     from: "hopperpayments",
@@ -744,6 +942,10 @@ module.exports = {
   async getContentListforHopper(model, data, userId, role) {
     return new Promise(async (resolve, reject) => {
       try {
+
+        const yesterdayStart = new Date(moment(data.startdate).clone().startOf('day'));
+        const yesterdayEnd = new Date(moment(data.endDate).clone().endOf('day'));
+
         const condition = {
           status: "published",
           is_deleted:false,
@@ -761,6 +963,21 @@ module.exports = {
             condition.is_draft = true;
           }
 
+
+          if (data.is_draft == "false" || data.is_draft == false) {
+            //give any status results when user wants its draft results
+            delete condition.paid_status;
+            delete condition.paid_status_to_hopper
+
+            const d = new Date()
+            const val = d.setDate(d.getDate() - 30)
+            
+            condition.published_time_date = {
+              $gte: new Date(val),
+              $lte: new Date()
+            };
+          }
+          
           if (data.type == "exclusive") {
             //give any status results when user wants its draft results
             // delete condition.status;
@@ -804,9 +1021,11 @@ module.exports = {
             condition.paid_status = "paid";
             condition.paid_status_to_hopper = false;
           }
-          const yesterdayStart = new Date(moment(data.startdate).clone().startOf('day'));
-          const yesterdayEnd = new Date(moment(data.endDate).clone().endOf('day'));
-          if (data.startdate && data.endDate) {
+       
+          
+
+
+          if (data.startdate && data.endDate && data.is_draft == "false" ) {
             // delete condition.status;
             // data.startdate = parseInt(data.startdate);
             // const today = data.endDate;
@@ -815,6 +1034,20 @@ module.exports = {
             // delete condition.paid_status;
             // delete condition.paid_status_to_hopper
             condition.published_time_date = {
+              $lte: yesterdayEnd,
+              $gte: yesterdayStart,
+            }; //{[Op.gte]: data.startdate};
+          }
+
+          if (data.startdate && data.endDate && data.is_draft == "true") {
+            // delete condition.status;
+            // data.startdate = parseInt(data.startdate);
+            // const today = data.endDate;
+            // const days = new Date(today.getTime() - (data.startdate*24*60*60*1000));
+            // console.log("day back----->",days);
+            // delete condition.paid_status;
+            // delete condition.paid_status_to_hopper
+            condition.createdAt = {
               $lte: yesterdayEnd,
               $gte: yesterdayStart,
             }; //{[Op.gte]: data.startdate};
@@ -1135,6 +1368,22 @@ module.exports = {
           };
         }
 
+        if (data.sort == "latest") {
+          sortBy = {
+            createdAt: -1,
+          };
+        }
+        //ask_price
+        if (data.sort == "low_price_content") {
+          sortBy = {
+            ask_price: 1,
+          };
+        }
+        if (data.sort == "high_price_content") {
+          sortBy = {
+            ask_price: -1,
+          };
+        }
         let condition1 = {};
         if (data.maxPrice && data.minPrice) {
           condition1 = {
@@ -1175,11 +1424,100 @@ module.exports = {
         if (data.id) {
           condition._id = mongoose.Types.ObjectId(data.id);
         }
+
+
+
+
+        let val = "year";
+        if (data.hasOwnProperty("daily")) {
+          val = "day";
+        }
+        if (data.hasOwnProperty("Weekly")) {
+          val = "week";
+        }
+    
+        if (data.hasOwnProperty("Monthly")) {
+          val = "month";
+        }
+    
+        if (data.hasOwnProperty("Yearly")) {
+          val = "year";
+        }
+
+        if (data.sort && data.sort != "high_price_content" && data.sort != "low_price_content") {
+          val = data.sort
+        }
+    
+        const yesterdayStart = new Date(moment().utc().startOf(val).format());
+        const yesterdayEnd = new Date(moment().utc().endOf(val).format());
+
+        let cond = {}
+
+        if (data.daily || data.yearly || data.monthly || data.weekly) {
+          condition1.createdAt = {
+            $lte: yesterdayEnd,
+            $gte: yesterdayStart,
+          }
+          // cond = {
+          //   createdAt: {
+          //     $lte: yesterdayEnd,
+          //     $gte: yesterdayStart,
+          //   },
+          // };
+        } 
+
+        if (data.sort && data.sort != "high_price_content" && data.sort != "low_price_content") {
+          // cond = {
+          //   createdAt: {
+          //     $lte: yesterdayEnd,
+          //     $gte: yesterdayStart,
+          //   },
+          // };
+          condition1.createdAt = {
+            $lte: yesterdayEnd,
+            $gte: yesterdayStart,
+          }
+        }
+
         console.log('data.user_id---------------------->', data.user_id)
         const params = [
           {
             $match: condition,
           },
+
+          {
+            $lookup: {
+              from: "baskets",
+              let: { id: "$content_id", user_id: mongoose.Types.ObjectId(data.user_id) },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [{ $eq: ["$post_id", "$$id"] },
+                      { $eq: ["$user_id", "$$user_id"] }
+  
+                      ],
+                    },
+                  },
+                },
+  
+              ],
+              as: "bakset_data",
+            },
+          },
+  
+          {
+            $addFields: {
+              basket_status: {
+                $cond: {
+                  if: { $ne: [{ $size: "$bakset_data" }, 0] },
+                  then: "true",
+                  else: "false"
+                }
+              }
+            }
+          },
+          
           {
             $lookup: {
               from: "contents",
@@ -1201,7 +1539,9 @@ module.exports = {
                     // { $eq: ["$_id", "$$content_id"] },
                   },
                 },
-                
+                {
+                  $match:cond
+                },
                 {
                   $lookup: {
                     from: "categories",
@@ -1280,6 +1620,9 @@ module.exports = {
           {
             $addFields: { type: "$content_id.type" },
           },
+
+
+          
           {
             $match: {content_id:{$exists:true}},
           },

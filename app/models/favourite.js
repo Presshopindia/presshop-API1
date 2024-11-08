@@ -11,7 +11,13 @@ const favouriteSchema = new mongoose.Schema(
     category_type: {
       type: String 
     },
-
+    uploaded_content: {
+      type: mongoose.Types.ObjectId,
+      ref: "Uploadcontent"
+    },
+    type: {
+      type: String 
+    },
     user_id: {
       type: mongoose.Types.ObjectId,
       ref: "User"

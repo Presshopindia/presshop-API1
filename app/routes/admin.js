@@ -935,6 +935,91 @@ router.delete(
 
 
 router.get("/getDeletedContent", requireAuth, trimRequest.all, controller.getDeletedContent);
-router.post("/deleteContent",  trimRequest.all, controller.deleteContent);
 router.patch("/updateNotification",  trimRequest.all, controller.updateNotification);
+router.post("/deleteContent",  requireAuth,trimRequest.all, controller.deleteContent);
+
+router.post("/deleteCsv", requireAuth, trimRequest.all, controller.deleteCsv);
+router.post("/uploadCsvtoS3", requireAuth, trimRequest.all, controller.uploadCsvtoS3);
+
+
+router.get("/listofRatingAndReviewForPublication", requireAuth, trimRequest.all, controller.listofRatingAndReviewForPublication);
+router.get("/listofRatingAndReviewForhopper", requireAuth, trimRequest.all, controller.listofRatingAndReviewForhopper);
+
+router.get("/testimonialListing", requireAuth, trimRequest.all, controller.testimonialListing);
+router.patch("/update/status/testimonial",  trimRequest.all, controller.updatestatusoftestimonial);
+
+
+router.post("/create/coupon", requireAuth, trimRequest.all, controller.createcoupon);
+
+router.get("/Content/MoreThan/ThreeOffer", requireAuth, trimRequest.all, controller.listofContentmorethanthreeOffer);
+
+router.post("/create/PromotionCodes", requireAuth, trimRequest.all, controller.createPromotionCodes);
+
+
+router.post("/deletetestimonials", requireAuth, trimRequest.all, controller.deletetestimonials);
+
+router.get("/getpromotionCodes", requireAuth, trimRequest.all, controller.getpromotionCodes);
+
+router.delete("/deletepromotionCodes/:id", requireAuth, trimRequest.all, controller.deletepromotionCodes);
+
+router.patch("/updateMultipleContent", requireAuth, trimRequest.all, controller.updateMultipleContent);
+
+
+router.post("/screenshot", requireAuth, trimRequest.all, controller.screenshot);
+
+router.patch("/editPromocode", requireAuth, trimRequest.all, controller.editPromocode);
+
+router.post(
+  "/forgotPassword",
+  trimRequest.all,
+  controller.adminForgotPassword
+);
+
+
+router.post(
+  "/createStripeAccount",
+  trimRequest.all,
+  controller.createStripeAccount
+);
+
+router.post("/updateMultipleOffices", requireAuth, trimRequest.all, controller.updateMultipleOffices);
+
+router.post("/deleteMultiContent", requireAuth, trimRequest.all, controller.deleteMultiContent);
+
+
+router.post("/createHopperAlert", requireAuth, trimRequest.all, controller.createHopperAlert);
+
+router.all("/stripeStatus", trimRequest.all, controller.stripeStatus);
+
+
+
+
+
+
+
+
+router.get("/getchatityList", requireAuth, trimRequest.all, controller.getchatityList);
+
+router.post("/updateCharity", requireAuth, trimRequest.all, controller.updateCharity);
+
+
+router.delete("/deleteCharity/:charity_id", requireAuth, trimRequest.all, controller.deleteCharity);
+
+router.get("/getHopperAlertList", requireAuth, trimRequest.all, controller.getHopperAlertList);
+
+
+router.delete("/deleteHopperAlert/:hopperAlert_id", requireAuth, trimRequest.all, controller.deleteHopperAlert);
+
+
+router.post("/deleteTags", requireAuth, trimRequest.all, controller.deleteTags);
+
+
+
+router.post("/createTags", requireAuth, trimRequest.all, controller.createTags);
+
+router.post("/uploadMediaforMultipleImage", requireAuth, trimRequest.all, controller.newuploadMediaforMultipleImage);
+
+router.post("/createExternal", requireAuth, trimRequest.all, controller.createExternal);
+
+router.get("/downloadall", trimRequest.all, controller.downloadall);
 module.exports = router;

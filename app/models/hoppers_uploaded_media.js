@@ -4,10 +4,10 @@ const uploadedMedia = new mongoose.Schema(
     hopper_id: {
       type: mongoose.Types.ObjectId,
     },
-    doc_id: {
-      type: mongoose.Types.ObjectId,
-      ref:"documents"
-    },
+    // doc_id: {
+    //   type: mongoose.Types.ObjectId,
+    //   ref:"documents"
+    // },
     doc_name:{
         type:String
     },

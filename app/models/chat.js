@@ -73,6 +73,18 @@ const ChatSchema = new mongoose.Schema(
     finaloffer_price:String,
     amount_paid:String,
     review:String,
+    status:{
+      type: String,
+      // enum: ['active', 'inactive'],
+      default: 'send'
+    },
+    features:Array,
+    hopper_price:String,
+    payable_to_hopper:String,
+    views:String,
+    purchase_count:String,
+    presshop_commission:String,
+    stripe_fee:String
   },
   {
     versionKey: false,

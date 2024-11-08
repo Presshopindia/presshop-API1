@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"deletedAt":{"$numberDouble":"-1.0"}},"name":"deletedAt_-1"}],"uuid":"7a3af71458554ae2a2284f067490f097","collectionName":"avatars","type":"collection"}

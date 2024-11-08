@@ -161,7 +161,15 @@ const AdminSchema = new mongoose.Schema(
       other_rights:{
         type:Boolean,
         default:false
-      }
+      },
+      allow_publication_chat:{
+        type:Boolean,
+        default:false
+      },
+      allow_hopper_chat:{
+        type:Boolean,
+        default:false
+      },
     },
     verified: {
       type: Boolean,

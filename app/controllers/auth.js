@@ -20,7 +20,7 @@ const auth = require("../middleware/auth");
 const emailer = require("../middleware/emailer");
 const { uploadFiletoAwsS3Bucket } = require("../shared/helpers");
 const HOURS_TO_BLOCK = 2;
-const LOGIN_ATTEMPTS = 1000000;
+const LOGIN_ATTEMPTS = 1;
 const TIME_FOR_OTP_EXPIRE_IN_MINUTES = 5;
 const STORAGE_PATH = process.env.STORAGE_PATH;
 const moment = require("moment");
@@ -189,7 +189,9 @@ const setUserInfo = (req) => {
       post_code: req.post_code,
       stripe_account_id: req.stripe_account_id,
       stripe_customer_id: req.stripe_customer_id,
-      stripe_status: req.stripe_status
+      stripe_status: req.stripe_status,
+      dob:req.dob,
+
     };
   } else if (req.role === "MediaHouse") {
     user = {
@@ -363,6 +365,8 @@ const saveUserAccessAndReturnToken = async (req, user) => {
       if (err) {
         reject(utils.buildErrObject(422, err.message));
       }
+
+      console.log("user--------",user)
       const userInfo = setUserInfo(user);
       // Returns data with access token
       resolve({
@@ -441,7 +445,7 @@ const otpTimeExpired = (otp_expire_time) => {
     if (otp_expire_time >= new Date()) {
       resolve(false);
     } else {
-      reject(utils.buildErrObject(422, "OTP_EXPIRED"));
+      reject(utils.buildErrObject(422, "This OTP has expired. Please request a new OTP by clicking the link below"));
     }
   });
 };
@@ -497,6 +501,16 @@ const isTempBlocked = async (user) => {
   });
 };
 
+
+
+const isPermanantBlocked = async (user) => {
+  return new Promise((resolve, reject) => {
+    if (user.isPermanentBlocked == "true" || user.isPermanentBlocked == true) {
+      reject(utils.buildErrObject(409, "Your Account is Permanantly blocked by admin"));
+    }
+    resolve(true);
+  });
+};
 /**
  * Finds user by email
  * @param {string} email - user´s email
@@ -519,7 +533,8 @@ const findUser = async (email) => {
   return new Promise((resolve, reject) => {
     User.findOne(
       {
-        email,
+        email:email,
+        is_deleted:false
       },
       "password loginAttempts blockExpires  email role verified verification first_name last_name user_name country_code phone profile_image address bank_detail recieve_task_notification location latitude longitude is_terms_accepted status forgotPassOTP forgotPassOTPExpire admin_detail admin_rignts upload_docs company_bank_details sign_leagel_terms stripe_customer_id chat_status",
       (err, item) => {
@@ -536,8 +551,27 @@ const findUser2 = async (email) => {
     User.findOne(
       {
         email,
+        is_deleted:false
       },
-      // "password loginAttempts blockExpires  email role verified verification first_name last_name user_name country_code phone profile_image address bank_detail recieve_task_notification location latitude longitude is_terms_accepted status forgotPassOTP forgotPassOTPExpire admin_detail admin_rignts upload_docs company_bank_details sign_leagel_terms stripe_customer_id chat_status",
+      "password loginAttempts blockExpires  email role verified verification first_name last_name user_name country_code phone profile_image address bank_detail recieve_task_notification location latitude longitude is_terms_accepted status forgotPassOTP forgotPassOTPExpire admin_detail admin_rignts upload_docs company_bank_details sign_leagel_terms stripe_customer_id chat_status",
+      (err, item) => {
+        console.log('item--->', item);
+        utils.itemNotFound(err, item, reject, "USER_DOES_NOT_EXIST");
+        resolve(item);
+      }
+    );
+  });
+};
+
+const findUserforHopper = async (email) => {
+  return new Promise((resolve, reject) => {
+    User.findOne(
+      {
+        email:email,
+        role: "Hopper",
+        is_deleted:false
+      },
+      "password loginAttempts blockExpires  email role verified verification first_name last_name user_name country_code phone profile_image address bank_detail recieve_task_notification location latitude longitude is_terms_accepted status forgotPassOTP forgotPassOTPExpire admin_detail admin_rignts upload_docs company_bank_details sign_leagel_terms stripe_customer_id chat_status",
       (err, item) => {
         console.log('item--->', item);
         utils.itemNotFound(err, item, reject, "USER_DOES_NOT_EXIST");
@@ -548,14 +582,14 @@ const findUser2 = async (email) => {
 };
 
 
-
 const findUserWithUserName = async (user_name) => {
   return new Promise((resolve, reject) => {
     User.findOne(
       {
-        user_name,
+        user_name:user_name,
+        is_deleted:false
       },
-      "password loginAttempts blockExpires  email role verified verification first_name last_name user_name country_code phone profile_image address bank_detail recieve_task_notification location latitude longitude is_terms_accepted avatar_id status doc_to_become_pro isTempBlocked isPermanentBlocked stripe_customer_id status",
+      "password stripe_status loginAttempts blockExpires  email role verified verification first_name last_name user_name country_code phone profile_image address bank_detail recieve_task_notification location latitude longitude is_terms_accepted avatar_id status doc_to_become_pro isTempBlocked isPermanentBlocked stripe_customer_id status",
       (err, item) => {
         utils.itemNotFound(err, item, reject, "USER_DOES_NOT_EXIST");
         resolve(item);
@@ -567,9 +601,10 @@ const findUserWithPhone = async (phone) => {
   return new Promise((resolve, reject) => {
     User.findOne(
       {
-        phone,
+        phone:phone,
+        is_deleted:false
       },
-      "password loginAttempts blockExpires  email role verified verification first_name last_name user_name country_code phone profile_image address bank_detail recieve_task_notification location latitude longitude is_terms_accepted avatar_id status doc_to_become_pro isTempBlocked isPermanentBlocked stripe_customer_id status",
+      "password stripe_status loginAttempts blockExpires  email role verified verification first_name last_name user_name country_code  profile_image address bank_detail recieve_task_notification location latitude longitude is_terms_accepted avatar_id status doc_to_become_pro isTempBlocked isPermanentBlocked stripe_customer_id status",
       (err, item) => {
         utils.itemNotFound(err, item, reject, "USER_DOES_NOT_EXIST");
         resolve(item);
@@ -613,10 +648,13 @@ const passwordsDoNotMatch = async (user) => {
   // user.loginAttempts += 1;
   await saveLoginAttemptsToDB(user);
   return new Promise((resolve, reject) => {
+
+    console.log("user====",user.loginAttempts)
     if (user.loginAttempts <= LOGIN_ATTEMPTS) {
       resolve(utils.buildErrObject(409, "WRONG_PASSWORD"));
     } else {
-      resolve(blockUser(user));
+      resolve(user);
+      // resolve(blockUser(user));
     }
     reject(utils.buildErrObject(422, "ERROR"));
   });
@@ -888,7 +926,7 @@ exports.login = async (req, res) => {
     await userIsBlocked(USER);
     await isTempBlocked(USER);
 
-    await checkLoginAttemptsAndBlockExpires(USER);
+    // await checkLoginAttemptsAndBlockExpires(USER);
     const isPasswordMatch = await auth.checkPassword(data.password, USER);
 
     if (!isPasswordMatch) {
@@ -904,6 +942,8 @@ exports.login = async (req, res) => {
         // all ok, register access and return token
         USER.loginAttempts = 0;
         await saveLoginAttemptsToDB(USER);
+
+        console.log("req------------",req)
         const { token, user } = await saveUserAccessAndReturnToken(req, USER);
 
         res.status(200).json({
@@ -936,8 +976,9 @@ exports.loginMediaHouse = async (req, res) => {
     }
     console.log("USER", USER);
     await userIsBlocked(USER);
-
-    await checkLoginAttemptsAndBlockExpires(USER);
+    await isTempBlocked(USER);
+    await isPermanantBlocked(USER)
+    // await checkLoginAttemptsAndBlockExpires(USER);
     const isPasswordMatch = await auth.checkPassword(data.password, USER);
     console.log("data------", isPasswordMatch);
     if (!isPasswordMatch) {
@@ -1059,41 +1100,61 @@ exports.register = async (req, res) => {
           name:data.user_name
         });
 
-        // const account = await stripe.accounts.create({
-        //   type: "standard",
-        //   country: "US",
-        //   email: req.body.email,
-        //   capabilities: {
-        //     card_payments: { requested: true },
-        //     transfers: { requested: true },
-        //   },
-        // });
+      //   const email = data.email || 'sample@example.com';
+      // const firstName = data.first_name || 'John';
+      // const lastName = data.last_name || 'Doe';
+      // const phone = data.phone || '7009656304';
+      // const addressLine1 = data.address || '123 Sample St';
+      // const addressCity = data.city || 'Sample City';
+      // const addressState = data.address_state || ''; // Not used in GB
+      // const addressPostalCode = data.post_code || 'SW1A 1AA';
+      // const addressCountry = data.country || 'GB';
+      // const dobDay = data.dob_day || 1;
+      // const dobMonth = data.dob_month || 1;
+      // const dobYear = data.dob_year || 1990;
 
+      // Create a new Stripe account with the provided or sample information
+      // const account = await stripe.accounts.create({
+      //     type: 'custom', // Use 'custom' to handle all information collection yourself
+      //     country: 'GB', // Change this to the appropriate country code
+      //     email: email,
+      //     business_type: 'individual', // or 'company'
+      //     individual: {
+      //         first_name: firstName,
+      //         last_name: lastName,
+      //         email: email,
+      //         phone: phone,
+      //         address: {
+      //             line1: addressLine1,
+      //             city: addressCity,
+      //             postal_code: addressPostalCode,
+      //             country: addressCountry
+      //         },
+      //         dob: {
+      //             day: dobDay,
+      //             month: dobMonth,
+      //             year: dobYear
+      //         }
+      //     },
+      //     business_profile: {
+      //         mcc: '5734', // Merchant Category Code
+      //         product_description: 'Your product description'
+      //     },
+      //     tos_acceptance: {
+      //         date: Math.floor(Date.now() / 1000), // Unix timestamp
+      //         ip: req.ip // User's IP address
+      //     },
+      //        capabilities: {
+      //     card_payments: { requested: true },
+      //     transfers: { requested: true },
+      //     link_payments: { requested: true },
+      //     // india_international_payments: {requested: true},
+      //     bank_transfer_payments: { requested: true },
+      //     card_payments: { requested: true },
+      //   }
+      // });
 
-        // const account = await stripe.accounts.create({
-        //   type: 'express',
-        //   country: 'US',
-        //   email: req.user.email,
-        //   business_type:'individual',
-        //   capabilities: {
-        //     card_payments: {requested: true},
-        //     transfers: {requested: true},
-        //     link_payments: {requested: true},
-        //     // india_international_payments: {requested: true},
-        //     bank_transfer_payments: {requested: true},
-        //     card_payments: {requested: true},
-        //   },
-        //   // individual:{
-        //   //   address:{
-        //   //     city:"Mill Creek",
-        //   //     country:"US",
-        //   //     postal_code:"98012",
-        //   //     state:"WA"
-        //   //   },
-        //   //   first_name:"test",
-        //   //   last_name:"test",
-        //   // }
-        // });
+       
 
         console.log("data-------", customer);
         data.stripe_customer_id = customer.id;
@@ -1144,14 +1205,15 @@ exports.register = async (req, res) => {
           // userName: `${data.user_first_name} ${data.user_last_name}`
         }
         const valu = await  emailer.sendMailToAdministator(locale, emailObjs);
+        
         const notiObj = {
           sender_id: response.user._id,
           receiver_id: response.user._id,
-          title: " Successfully registered ",
+          title: "Successfully registered ",
           body: `👋🏼 Congrats ${response.user.first_name}, your onboarding is now complete👍🏼 Please check your registered email id, to log onto the platform 🚀. If you need any assistance, please speak to a member of your onboarding team or call, email or chat with us on the platform. Our helpful and experienced teams will be happy to assist 🙌🏼 Welcome to PRESSHOP🐰 `,
         };
         const resp = await _sendPushNotification(notiObj);
-      console.log("emailer===============",valu)
+     
         res.status(201).json(response);
       }
     }
@@ -1256,7 +1318,7 @@ exports.hopperForgotPassword = async (req, res) => {
     // Gets locale from header 'Accept-Language'
     const locale = req.getLocale();
     const data = matchedData(req);
-    const user = await findUser(data.email);
+    const user = await findUserforHopper(data.email);
     const OTP = await generateOTP();
     user.forgotPassOTP = OTP;
     user.forgotPassOTPExpire = new Date(
@@ -1275,12 +1337,12 @@ exports.hopperForgotPassword = async (req, res) => {
              to: user.country_code + user.phone
            })
           .then(message => console.log(message.sid));
-    // emailer.sendHopperResetPasswordOTP(locale, user);
+    emailer.sendHopperResetPasswordOTP(locale, user);
     const notiObj = {
       sender_id: user._id,
       receiver_id: user._id,
       title: "Reset your password",
-      body: `👋🏼 Hi ${user.user_name}, you've got mail 📩  Please check your resgistered email id, and reset your password 🔒 Thanks - Team PRESSHOP🐰 `,
+      body: `👋🏼 Hi ${user.user_name}, you've got mail 📩  Please check your registered email id, and reset your password 🔒 Thanks - Team PRESSHOP🐰 `,
     };
     const resp = await _sendPushNotification(notiObj);
     res.status(200).json({
@@ -1500,6 +1562,7 @@ exports.sendOTP = async (req, res) => {
     const client = require('twilio')(accountSid, authToken);
     // const emailOTP = await generateOTP();
     const phoneOTP = await generateOTP();
+
     client.messages
           .create({
              from: '+447700174526',
@@ -1507,6 +1570,8 @@ exports.sendOTP = async (req, res) => {
              to: data.phone
            })
           .then(message => console.log(message.sid));
+
+
     // when client provide sms api uncomment this code
     // const phoneOTP = 12345;
 
@@ -1517,6 +1582,7 @@ console.log("phone================",User)
       console.log("phone===1=inside if============",User)
       const updateObj = {
         // email_otp: emailOTP,
+        // is_verifed:1,
         phone_otp: phoneOTP,
         otp_expire: new Date(
           moment().add(TIME_FOR_OTP_EXPIRE_IN_MINUTES, "minutes")
@@ -1537,6 +1603,7 @@ console.log("phone================",User)
         email: data.email,
         phone: data.phone,
         // email_otp: emailOTP,
+        // is_verifed:0,
         phone_otp: phoneOTP,
         otp_expire: new Date(
           moment().add(TIME_FOR_OTP_EXPIRE_IN_MINUTES, "minutes")
@@ -1553,7 +1620,7 @@ console.log("phone================",User)
     // ]);
     res.status(200).json({
       status: 200,
-      data: "OTP Sent",
+      data: "A new OTP has been sent to your mobile",
     });
   } catch (error) {
     utils.handleError(res, error);
@@ -1568,14 +1635,38 @@ exports.verifyOTP = async (req, res) => {
     };
     const USER_VERFICATION = await UserVerification.findOne(condition);
     console.log("USER_VERFICATION==============",USER_VERFICATION, data)
+
+let value = false 
+let code = 200
     if (!(await otpTimeExpired(USER_VERFICATION.otp_expire))) {
       // if (USER_VERFICATION.email_otp !== Number(data.email_otp))
       //   throw utils.buildErrObject(422, "Email OTP is Not Valid");
       if (USER_VERFICATION.phone_otp !== Number(data.phone_otp))
-        throw utils.buildErrObject(422, "Phone OTP is Not Valid");
+        throw utils.buildErrObject(422, "This OTP is not valid. Please enter the correct OTP to proceed");
+      const updateObj = {
+        // email_otp: emailOTP,
+        // is_verifed:1,
+        // phone_otp: phoneOTP,
+        // otp_expire: new Date(
+        //   moment().add(TIME_FOR_OTP_EXPIRE_IN_MINUTES, "minutes")
+        // ),
+      };
+      // await UserVerification.updateOne(
+      //   {
+      //     _id: USER_VERFICATION._id,
+      //   },
+      //   updateObj
+      // );
 
-      res.status(200).json({
-        code: 200,
+
+// if(USER_VERFICATION.is_verifed == 1){
+//   value = true
+//   code = 400
+// }
+
+
+      res.status(code).json({
+        code: code,
         otp_match: true,
       });
     }

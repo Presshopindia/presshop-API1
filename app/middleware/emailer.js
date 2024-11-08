@@ -17,6 +17,7 @@ app.set("view engine", "ejs");
 // const __link = "http://appdevelopers.xyz:3001/"
 
 const mailer = require("express-mailer");
+const { rejects } = require("assert");
 // var bcrypt = require('bcrypt');
 mailer.extend(app, {
   from: `${process.env.EMAIL_FROM_APP} <no-reply@presshop.com>`,
@@ -240,7 +241,8 @@ module.exports = {
       {
         to: data.email,
         subject: "credientials for login for mediahouse employee",
-        OTP: data.password
+        OTP: data.password,
+        first_name:data.first_name
       },
       function (err, message) {
         if (err) {
@@ -316,16 +318,33 @@ module.exports = {
   },
 
   async sendMailToAdministator(locale, Obj) {
+   return  new Promise(async (resolve,reject) => {
     app.mailer.send(
       `${locale}/sendMailToAdministator`,
       Obj,
       function (err, message) {
         if (err) {
+          
           console.log("There was an error sending the email" + err);
+          reject(err)
         } else {
           console.log("MAIL SEND");
+          resolve(message)
         }
       }
     );
+   })
+    // app.mailer.send(
+    //   `${locale}/sendMailToAdministator`,
+    //   Obj,
+    //   function (err, message) {
+    //     if (err) {
+          
+    //       console.log("There was an error sending the email" + err);
+    //     } else {
+    //       console.log("MAIL SEND");
+    //     }
+    //   }
+    // );
   },
 };

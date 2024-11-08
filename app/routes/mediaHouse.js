@@ -281,7 +281,7 @@ router.get(
 router.get(
   "/getallpublishedcontent",
   trimRequest.all,
-  // requireAuth,
+  requireAuth,
   controller.getallpublishedcontent
 );
 
@@ -476,14 +476,14 @@ router.get(
 router.get(
   "/reportgraphofContentforPaid",
   trimRequest.all,
-  // requireAuth,
+  requireAuth,
   controller.reportgraphofContentforPaid
 );
 
 router.get(
   "/reportgraphofContent",
   trimRequest.all,
-  // requireAuth,
+  requireAuth,
   controller.reportgraphofContentsourcedSumary
 );
 router.get(
@@ -577,14 +577,14 @@ router.post(
 router.post(
   "/MoreContent",
   trimRequest.all,
-  // requireAuth,
+  requireAuth,
   controller.MoreContent
 );
 
 router.post(
   "/relatedContent",
   trimRequest.all,
-  // requireAuth,
+  requireAuth,
   controller.relatedContent
 );
 
@@ -704,16 +704,16 @@ router.post(
 
 
 router.post(
-  "/MoreContentfortask",
+  "/MoreContentforTask",
   trimRequest.all,
-  // requireAuth,
+  requireAuth,
   controller.MoreContentfortask
 );
 
 router.post(
-  "/relatedContentfortask",
+  "/relatedContentforTask",
   trimRequest.all,
-  // requireAuth,
+  requireAuth,
   controller.relatedContentfortask
 );
 
@@ -791,7 +791,8 @@ router.get(
 ); 
 
 router.post(
-  "/archivecontent", // published contents view api
+  "/archivecontent", 
+  requireAuth,   // published contents view api
   trimRequest.all,
   controller.archivecontent
 );
@@ -821,4 +822,307 @@ router.post(
   trimRequest.all,
   controller.checkcompanyvalidation
 );
+
+
+router.post(
+  "/getMediahouseUser",
+  requireAuth,
+  trimRequest.all,
+  controller.getMediahouseUser
+);
+
+
+router.post(
+  "/updateseenforInternalchat",
+  trimRequest.all,
+  requireAuth,
+  controller.updateseenforInternalchat
+);
+
+
+
+router.get(
+  "/content/reportSplit",
+  trimRequest.all,
+  requireAuth,
+  controller.NewContentReportSplit
+);
+router.get(
+  "/report/task/graph",
+  trimRequest.all,
+  requireAuth,
+  controller.NewTaskreportgraphoftask
+);
+
+router.get(
+  "/reportContentCategoryPeriodWise",
+  trimRequest.all,
+  requireAuth,
+  controller.reportContentCategoryPeriodWise
+);
+
+
+router.get(
+  "/reportContentTypePeriodWise",
+  trimRequest.all,
+  requireAuth,
+  controller.reportContentTypePeriodWise
+);
+
+
+router.post(
+  "/contentUnderOfferForcard",
+  trimRequest.all,
+  requireAuth,
+  controller.contentUnderOfferForcard
+);
+
+router.post(
+  "/contentPurchasedOnlileForcard",
+  trimRequest.all,
+  requireAuth,
+  controller.contentPurchasedOnlileForcard
+);
+
+router.post(
+  "/purchasedContentTypeWise",
+  trimRequest.all,
+  requireAuth,
+  controller.contenPurchasedOnlineMain
+);
+
+router.post(
+  "/DashboardcontentTypeMain",
+  trimRequest.all,
+  requireAuth,
+  controller.DashboardcontentTypeMain
+);
+
+
+router.post(
+  "/contentPurchasedFromTask",
+  trimRequest.all,
+  requireAuth,
+  controller.contentPurchasedFromTask
+);
+
+
+router.post(
+  "/createPaymentMethodforcard",
+  trimRequest.all,
+  requireAuth,
+  controller.createPaymentMethodforcard
+);
+
+router.post(
+  "/AttachPaymentMethod",
+  trimRequest.all,
+  requireAuth,
+  controller.AttachPaymentMethod
+);
+
+router.post(
+  "/listPaymentMethod",
+  trimRequest.all,
+  requireAuth,
+  controller.listPaymentMethod
+);
+
+router.post(
+  "/createfee",
+  trimRequest.all,
+  // requireAuth,
+  controller.createfee
+);
+
+
+router.post(
+  "/addToBasket",
+  trimRequest.all,
+  requireAuth,
+  controller.addToBasket
+);
+
+
+
+router.post(
+  "/getBasketData",
+  trimRequest.all,
+  requireAuth,
+  controller.getBasketData
+);
+
+router.get(
+  "/getBasketDataCount",
+  trimRequest.all,
+  requireAuth,
+  controller.getBasketDataCount
+);
+
+router.get(
+  "/checkoutlist",
+  trimRequest.all,
+  // requireAuth,
+  controller.checkoutlist
+);
+
+
+router.post(
+  "/updateNotification/ClearAll",
+  trimRequest.all,
+  requireAuth,
+  controller.updateNotificationforClearAll
+);
+
+
+router.post(
+  "/getOfficeListBasedUponMediahouseEmail",
+  trimRequest.all,
+  // requireAuth,
+  controller.getOfficeListBasedUponMediahouseEmail
+);
+
+
+
+router.post(
+  "/createPaymentforBasket",
+  trimRequest.all,
+  requireAuth,
+  controller.createPaymentforBasket
+);
+
+router.post(
+  "/newChatFlow",
+  trimRequest.all,
+  requireAuth,
+  controller.newChatFlow
+);
+
+router.post(
+  "/getProfileAccordingUserId",
+  trimRequest.all,
+  // requireAuth,
+  controller.getProfileAccordingUserId
+);
+
+
+router.post(
+  "/newChatFlow",
+  trimRequest.all,
+  // requireAuth,
+  controller.newChatFlow
+);
+
+
+router.post(
+  "/getUserListAccordingToOfficeId",
+  trimRequest.all,
+  // requireAuth,
+  controller.getUserListAccordingToOfficeId
+);
+
+
+
+router.post(
+  "/updateMultipleUser",
+  trimRequest.all,
+  // requireAuth,
+  controller.updateMultipleUser
+);
+
+
+router.post(
+  "/addMultipleUser",
+  trimRequest.all,
+  // requireAuth,
+  controller.addMultipleUser
+);
+
+
+router.post(
+  "/addTestimonial",
+  trimRequest.all,
+  requireAuth,
+  controller.addTestimonial
+);
+
+
+router.post(
+  "/applicationfee",
+  trimRequest.all,
+  requireAuth,
+  controller.applicationfee
+);
+
+
+
+router.get(
+  "/contentonlineCard",
+  trimRequest.all,
+  requireAuth,
+  controller.contentonlineCard
+);
+
+
+router.get(
+  "/getTestimonial",
+  trimRequest.all,
+  requireAuth,
+  controller.getTestimonial
+);
+
+
+
+
+router.post(
+  "/checkPromocode",
+  trimRequest.all,
+  requireAuth,
+  controller.checkPromocode
+);
+
+
+router.post(
+  "/contentaverageprice",
+  trimRequest.all,
+  requireAuth,
+  controller.contentaverageprice
+);
+
+
+router.post(
+  "/createTax",
+  trimRequest.all,
+  // requireAuth,
+  controller.createTax
+);
+
+
+
+
+router.post(
+  "/deleteinternalGroupChatMH",
+  trimRequest.all,
+  requireAuth,
+  controller.deleteinternalGroupChatMH
+);
+
+router.all(
+  "/successforBulk",
+  // requireAuth,
+  trimRequest.all,
+  controller.successforBulk
+);
+
+
+router.post("/preRegistration", trimRequest.all, controller.preRegistration);
+router.get("/getPreRegistrationData", trimRequest.all, controller.getPreRegistrationData);
+
+// router.post(
+//   "/webhook",
+//   // trimRequest.all,
+//   express.raw({type: 'application/json'}),
+//   // requireAuth,
+//   controller.webhook
+// );
 module.exports = router;

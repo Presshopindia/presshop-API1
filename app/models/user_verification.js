@@ -24,6 +24,10 @@ const UserVerificationSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    is_verifed: {
+      type: Number,
+      // required: true,
+    },
     otp_expire: {
       type: Date,
       default: new Date(),

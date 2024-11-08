@@ -31,6 +31,15 @@ const recentactivity = new mongoose.Schema(
       },
 
     type:String,
+    contentType:String,
+    category:{
+      type: String,
+      // required: tru
+    },
+    paid_status:{
+      type:Boolean,
+      default: false
+    }
   },
   {
     versionKey: false,

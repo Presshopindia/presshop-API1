@@ -3,7 +3,7 @@ const validator = require("validator");
 
 const notificationSchema = new mongoose.Schema(
   {
- 
+
     sender_id: {
       type: mongoose.Types.ObjectId,
       required: true,
@@ -14,17 +14,38 @@ const notificationSchema = new mongoose.Schema(
       required: true,
       ref: "User",
     }],
-
-    is_read:{
-     type:Boolean,
-     default:false,
+    type: {
+      type: String
     },
-    is_admin:{
-      type:Boolean,
-      default:false,
-     },
-    title:String,
-    body:String,
+    is_read: {
+      type: Boolean,
+      default: false,
+    },
+    is_admin: {
+      type: Boolean,
+      default: false,
+    },
+    timestamp_forsorting:{
+      type: Date,
+      default: new Date(),
+    },
+
+    send_by_admin:{
+      type: Boolean,
+      default: false,
+    },
+    is_deleted_for_mediahoue:{
+      type: Boolean,
+      default: false,
+    },
+    is_deleted_for_app:{
+      type: Boolean,
+      default: false,
+    },
+    title: String,
+    body: String,
+    content_link:String,
+    dataforUser:String
   },
   {
     versionKey: false,
